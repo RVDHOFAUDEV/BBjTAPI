@@ -6,6 +6,7 @@ t! = new BBjTAPIClient()
 
 helper! = new helper()
 
+rem setCallbackForIncomingCall(extenstion, object, method)
 t!.setCallbackForIncomingCall("230",helper!,"onIncomingCall")
 
 

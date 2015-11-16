@@ -3,6 +3,8 @@ use ::../BBjTAPI.bbj::BBjTAPIClient
 
 declare BBjTAPIClient t!
 t! = new BBjTAPIClient()
+
+rem setCallbackForIncomingCall(extension, label)
 t!.setCallbackForIncomingCall("230","incomingCall") 
 
 process_events

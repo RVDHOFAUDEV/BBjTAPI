@@ -18,6 +18,9 @@
 #define IDC_IPADDRESS1                  1005
 #define IDC_SERVER2                     1005
 #define IDC_EXTENSION                   1005
+#define IDC_DEVICE                      1006
+#define IDC_ADRESS                      1007
+#define IDC_ADDRESS                     1007
 #define ID_TRAYMENU_ITEM1               32771
 #define ID_TRAYMENU_ITEM2               32772
 #define ID_TRAYMENU_ITEM3               32773
@@ -54,7 +57,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1006
+#define _APS_NEXT_CONTROL_VALUE         1007
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

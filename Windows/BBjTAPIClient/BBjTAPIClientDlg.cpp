@@ -10,6 +10,7 @@
 #define new DEBUG_NEW
 #endif
 
+class CTapiCall;
 
 // CAboutDlg dialog used for App About
 
@@ -42,6 +43,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
+
 END_MESSAGE_MAP()
 
 
@@ -58,6 +60,7 @@ CBBjTAPIClientDlg::CBBjTAPIClientDlg(CWnd* pParent /*=NULL*/)
 	, Ext(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	WaitingForMinimize=false;
 }
 
 void CBBjTAPIClientDlg::DoDataExchange(CDataExchange* pDX)
@@ -68,6 +71,8 @@ void CBBjTAPIClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDV_MaxChars(pDX, Host, 255);
 	DDX_Text(pDX, IDC_STATUS, Status);
 	DDX_Text(pDX, IDC_EXTENSION, Ext);
+	DDX_Control(pDX, IDC_DEVICE, cbDevice);
+	DDX_Control(pDX, IDC_ADDRESS, cbAddress);
 }
 
 BEGIN_MESSAGE_MAP(CBBjTAPIClientDlg, CTrayDialog)
@@ -79,6 +84,9 @@ BEGIN_MESSAGE_MAP(CBBjTAPIClientDlg, CTrayDialog)
 	ON_BN_CLICKED(IDOK, &CBBjTAPIClientDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_SIMU_INCOMINGCALL, &CBBjTAPIClientDlg::OnBnClickedSimuIncomingcall)
 	ON_WM_TIMER()
+	ON_CBN_SELCHANGE(IDC_DEVICE, &CBBjTAPIClientDlg::OnCbnSelchangeDevice)
+	ON_CBN_SELCHANGE(IDC_ADDRESS, &CBBjTAPIClientDlg::OnCbnSelchangeAddress)
+	ON_MESSAGE(UM_NEWCALL, i_OnNewCall)
 END_MESSAGE_MAP()
 
 
@@ -121,6 +129,14 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	con	= new CTAPIServerConnection();
 	con->dlg = this;
 	
+	cbDevice.ResetContent();
+
+	for (int i=0; i<con->Devices.GetSize(); i++)
+	{
+		cbDevice.AddString(con->Devices.GetAt(i));
+	}
+	cbDevice.SetCurSel(0);
+	OnCbnSelchangeDevice();
 	SetTimer(1, 10000, NULL);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -182,11 +198,15 @@ void CBBjTAPIClientDlg::OnBnClickedOk()
 
 	UpdateData(1);
 	con->Reconnect(Host,Port,Ext);
+	con->StartTAPISession();
+	WaitingForMinimize=true;
+	
 }
 
 void CBBjTAPIClientDlg::OnBnClickedSimuIncomingcall()
 {
-	con->IncomingCall("+49681968140");
+	//con->IncomingCall("+49681968140");
+	//con->MakeCall("230");
 }
 
 void CBBjTAPIClientDlg::UpdateDisplay()
@@ -206,6 +226,12 @@ void CBBjTAPIClientDlg::UpdateDisplay()
 			Status +=")";
 		}
 		UpdateData(0);
+
+		if (WaitingForMinimize)
+		{
+			WaitingForMinimize=false;
+			PostMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
+		}
 }
 
 
@@ -217,4 +243,35 @@ void CBBjTAPIClientDlg::OnTimer(UINT_PTR nIDEvent)
 		con->Reconnect(Host,Port,Ext);
 	}
 	CTrayDialog::OnTimer(nIDEvent);
+}
+
+void CBBjTAPIClientDlg::OnCbnSelchangeDevice()
+{
+
+	con->SelectLine(cbDevice.GetCurSel());
+	cbAddress.ResetContent();
+
+	for (int i=0; i<con->Addresses.GetSize(); i++)
+	{
+		cbAddress.AddString(con->Addresses.GetAt(i));
+	}
+	cbAddress.SetCurSel(0);
+	con->SelectAddress(0);
+}
+
+void CBBjTAPIClientDlg::OnCbnSelchangeAddress()
+{
+	con->SelectAddress(cbAddress.GetCurSel());
+}
+
+
+
+LRESULT CBBjTAPIClientDlg::i_OnNewCall(WPARAM wParam, LPARAM lParam)
+{
+	CString* number = (CString*) wParam;
+	if (number->GetLength()>1)
+	{
+		con->IncomingCall(*number);
+	}
+	return 0;
 }

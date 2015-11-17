@@ -67,6 +67,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="tapi32.lib atapid.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -147,6 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="tapi32.lib atapi.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -228,11 +230,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\Atapi.h"
+				>
+			</File>
+			<File
 				RelativePath=".\BBjTAPIClient.h"
 				>
 			</File>
 			<File
 				RelativePath=".\BBjTAPIClientDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Phone.h"
 				>
 			</File>
 			<File

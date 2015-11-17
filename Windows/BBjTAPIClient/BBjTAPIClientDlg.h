@@ -2,6 +2,7 @@
 //
 
 #pragma once
+#define UM_NEWCALL		 (WM_USER + 100)
 
 #include "TrayDialog.h"
 #include "afxwin.h"
@@ -39,9 +40,11 @@ public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedButton1();
 	afx_msg void OnEnChangeSimuDocall();
+	afx_msg LRESULT i_OnNewCall(WPARAM wParam, LPARAM lParam);
 	CString Port;
 	CString Host;
 	CString Status;
+	BOOL WaitingForMinimize;
 
 
 	afx_msg void OnBnClickedSimuIncomingcall();
@@ -49,4 +52,9 @@ public:
 	void UpdateDisplay();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	CString Ext;
+	CComboBox cbDevice;
+	afx_msg void OnCbnSelchangeDevice();
+	CComboBox cbAddress;
+	afx_msg void OnCbnSelchangeAddress();
+	afx_msg void OnBnClickedCancel();
 };

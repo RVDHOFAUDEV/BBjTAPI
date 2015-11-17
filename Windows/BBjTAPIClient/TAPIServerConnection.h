@@ -1,10 +1,13 @@
 #pragma once
 #include "afxsock.h"
 
+
+
 class CBBjTAPIClientDlg;
 
+
 class CTAPIServerConnection :
-	public CAsyncSocket
+	public CAsyncSocket 
 {
 public:
 	CTAPIServerConnection(void);
@@ -24,8 +27,19 @@ public:
 		CString host;
 		int port;
 		CString extension;
-
+		CArray<CString> Devices; 
+		CArray<CObject*> DeviceObjects;
+		CArray<CString> Addresses; 
+		CArray<CObject*> AddressObjects;
+		int SelectedLine;
+		int SelectedAddress;
+		CObject* OpenLine;
 		
 public:
 	void IncomingCall(CString number);
+	void BuildTAPIData(void);
+	void SelectLine(int line);
+	void SelectAddress(int address);
+	void StartTAPISession(void);
+	void MakeCall(CString);
 };

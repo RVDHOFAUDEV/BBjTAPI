@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "BBjTAPIClient.h"
 #include "BBjTAPIClientDlg.h"
-
+#include "registry.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,6 +73,9 @@ void CBBjTAPIClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EXTENSION, Ext);
 	DDX_Control(pDX, IDC_DEVICE, cbDevice);
 	DDX_Control(pDX, IDC_ADDRESS, cbAddress);
+	DDX_Control(pDX, IDC_SERVER, edServer);
+	DDX_Control(pDX, IDC_PORT, edPort);
+	DDX_Control(pDX, IDC_EXTENSION, edExt);
 }
 
 BEGIN_MESSAGE_MAP(CBBjTAPIClientDlg, CTrayDialog)
@@ -123,6 +126,12 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	TraySetToolTip("BBj TAPI Client");
 	//TraySetMenu(IDR_MENU1);
 
+	Host=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Host","");
+	Port=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Port","");
+	Ext=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Ext","");
+	
+	UpdateData(0);
+
 	//send to tray icon immediately:
 	//PostMessage(WM_SYSCOMMAND, SC_MINIMIZE, 0);
 	
@@ -130,13 +139,41 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	con->dlg = this;
 	
 	cbDevice.ResetContent();
-
 	for (int i=0; i<con->Devices.GetSize(); i++)
 	{
 		cbDevice.AddString(con->Devices.GetAt(i));
 	}
 	cbDevice.SetCurSel(0);
+	CString tmp;
+	tmp=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device","");
+	if (tmp.GetLength()>0)
+	{
+		for (int i=0; i<con->Devices.GetSize(); i++)
+		{
+			if (con->Devices.GetAt(i) == tmp)
+			{
+				cbDevice.SetCurSel(i);
+				break;
+			}
+		}		
+	}
 	OnCbnSelchangeDevice();
+	tmp=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address","");
+	if (tmp.GetLength()>0)
+	{
+		for (int i=0; i<con->Addresses.GetSize(); i++)
+		{
+			if (con->Addresses.GetAt(i) == tmp)
+			{
+				cbAddress.SetCurSel(i);
+				WaitingForMinimize=true;
+				con->StartTAPISession();
+				con->Reconnect(Host,Port,Ext);
+				break;
+			}
+		}		
+	}
+	
 	SetTimer(1, 10000, NULL);
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
@@ -196,10 +233,21 @@ HCURSOR CBBjTAPIClientDlg::OnQueryDragIcon()
 void CBBjTAPIClientDlg::OnBnClickedOk()
 {
 
+		
 	UpdateData(1);
-	con->Reconnect(Host,Port,Ext);
-	con->StartTAPISession();
+
+
+	
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Host",Host);
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Port",Port);
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Ext",Ext);
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device",con->Devices.GetAt(con->SelectedLine));
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address",con->Addresses.GetAt(con->SelectedAddress));
+
 	WaitingForMinimize=true;
+	con->StartTAPISession();
+	con->Reconnect(Host,Port,Ext);
+
 	
 }
 

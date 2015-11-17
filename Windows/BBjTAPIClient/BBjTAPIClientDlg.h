@@ -57,4 +57,7 @@ public:
 	CComboBox cbAddress;
 	afx_msg void OnCbnSelchangeAddress();
 	afx_msg void OnBnClickedCancel();
+	CEdit edServer;
+	CEdit edPort;
+	CEdit edExt;
 };

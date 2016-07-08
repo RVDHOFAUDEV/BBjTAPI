@@ -259,8 +259,9 @@ void CTrayDialog::TraySetMinimizeToTray(BOOL bMinimizeToTray)
 
 void CTrayDialog::OnTrayRButtonDown(CPoint pt)
 {
-	m_mnuTrayMenu.GetSubMenu(0)->TrackPopupMenu(TPM_BOTTOMALIGN|TPM_LEFTBUTTON|TPM_RIGHTBUTTON,pt.x,pt.y,this);
-	m_mnuTrayMenu.GetSubMenu(0)->SetDefaultItem(m_nDefaultMenuItem,TRUE);
+	if(m_bMinimizeToTray)
+		if(TrayHide())
+			this->ShowWindow(SW_SHOW);
 }
 
 void CTrayDialog::OnTrayLButtonDown(CPoint pt)

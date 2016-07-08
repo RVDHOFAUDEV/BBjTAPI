@@ -90,10 +90,35 @@ BEGIN_MESSAGE_MAP(CBBjTAPIClientDlg, CTrayDialog)
 	ON_CBN_SELCHANGE(IDC_DEVICE, &CBBjTAPIClientDlg::OnCbnSelchangeDevice)
 	ON_CBN_SELCHANGE(IDC_ADDRESS, &CBBjTAPIClientDlg::OnCbnSelchangeAddress)
 	ON_MESSAGE(UM_NEWCALL, i_OnNewCall)
+	ON_BN_CLICKED(IDCANCEL, &CBBjTAPIClientDlg::OnBnClickedCancel2)
 END_MESSAGE_MAP()
 
 
 // CBBjTAPIClientDlg message handlers
+
+
+CString CBBjTAPIClientDlg::getCmdLineOption(CString option)
+{
+	CString cmdline = GetCommandLineA();
+	CString ret = "";
+	if (cmdline.Find(option) >-1)
+	{
+		ret = cmdline.Right(cmdline.GetLength()-cmdline.Find(option)-option.GetLength());
+		if (ret.Left(1)=="\"")
+		{
+			ret=ret.Left(ret.Find("\"",2));	
+			ret=ret.Right(ret.GetLength()-1);
+		}
+		else
+			if (ret.Find(" ")>-1)
+			{
+				ret=ret.Left(ret.Find(" "));
+			}
+
+	}
+	return ret;
+}
+
 
 BOOL CBBjTAPIClientDlg::OnInitDialog()
 {
@@ -126,9 +151,27 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	TraySetToolTip("BBj TAPI Client");
 	//TraySetMenu(IDR_MENU1);
 
-	Host=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Host","");
-	Port=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Port","");
-	Ext=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Ext","");
+
+
+	CString tmp;
+
+	tmp=this->getCmdLineOption("-S");
+	if (tmp.GetLength()>0)
+		Host=tmp;
+	else
+		Host=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Host","");
+
+	tmp=this->getCmdLineOption("-P");
+	if (tmp.GetLength()>0)
+		Port=tmp;
+	else
+		Port=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Port","");
+
+	tmp=this->getCmdLineOption("-E");
+	if (tmp.GetLength()>0)
+		Ext=tmp;
+	else
+		Ext=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Ext","");
 	
 	UpdateData(0);
 
@@ -144,8 +187,11 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 		cbDevice.AddString(con->Devices.GetAt(i));
 	}
 	cbDevice.SetCurSel(0);
-	CString tmp;
-	tmp=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device","");
+
+	tmp=this->getCmdLineOption("-D");
+	if (tmp.IsEmpty())
+		tmp=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device","");
+
 	if (tmp.GetLength()>0)
 	{
 		for (int i=0; i<con->Devices.GetSize(); i++)
@@ -158,7 +204,10 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 		}		
 	}
 	OnCbnSelchangeDevice();
-	tmp=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address","");
+
+	tmp=this->getCmdLineOption("-A");
+	if (tmp.IsEmpty())
+		tmp=QueryRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address","");
 	if (tmp.GetLength()>0)
 	{
 		for (int i=0; i<con->Addresses.GetSize(); i++)
@@ -230,14 +279,10 @@ HCURSOR CBBjTAPIClientDlg::OnQueryDragIcon()
 
 
 
+
 void CBBjTAPIClientDlg::OnBnClickedOk()
 {
-
-		
 	UpdateData(1);
-
-
-	
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Host",Host);
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Port",Port);
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Ext",Ext);
@@ -247,7 +292,6 @@ void CBBjTAPIClientDlg::OnBnClickedOk()
 	WaitingForMinimize=true;
 	con->StartTAPISession();
 	con->Reconnect(Host,Port,Ext);
-
 	
 }
 
@@ -322,4 +366,11 @@ LRESULT CBBjTAPIClientDlg::i_OnNewCall(WPARAM wParam, LPARAM lParam)
 		con->IncomingCall(*number);
 	}
 	return 0;
+}
+
+void CBBjTAPIClientDlg::OnBnClickedCancel2()
+{
+	int a= AfxMessageBox("Shutdown TAPI Client?",MB_YESNO);
+	if (a==6)
+		this->EndDialog(0);
 }

@@ -40,7 +40,7 @@ BOOL CBBjTAPIClientApp::InitInstance()
    HANDLE hHandle = CreateMutex( NULL, TRUE, szUniqueNamedMutex );
    if( ERROR_ALREADY_EXISTS == GetLastError() )
    {
-      AfxMessageBox("BBjTAPIClient already active!");
+      // AfxMessageBox("BBjTAPIClient already active!");
       return FALSE; // Exit program
    }
 

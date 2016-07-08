@@ -28,6 +28,8 @@ protected:
 	HICON m_hIcon;
 	CTAPIServerConnection* con;
 
+	CString getCmdLineOption(CString);
+
 	// Generated message map functions
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
@@ -60,4 +62,5 @@ public:
 	CEdit edServer;
 	CEdit edPort;
 	CEdit edExt;
+	afx_msg void OnBnClickedCancel2();
 };

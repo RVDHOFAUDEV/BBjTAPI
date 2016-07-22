@@ -215,9 +215,10 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 			if (con->Addresses.GetAt(i) == tmp)
 			{
 				cbAddress.SetCurSel(i);
-				WaitingForMinimize=true;
-				con->StartTAPISession();
-				con->Reconnect(Host,Port,Ext);
+				
+				if (con->StartTAPISession() && 
+				con->Reconnect(Host,Port,Ext) )
+					WaitingForMinimize=true;
 				break;
 			}
 		}		
@@ -289,10 +290,11 @@ void CBBjTAPIClientDlg::OnBnClickedOk()
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device",con->Devices.GetAt(con->SelectedLine));
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address",con->Addresses.GetAt(con->SelectedAddress));
 
-	WaitingForMinimize=true;
-	con->StartTAPISession();
-	con->Reconnect(Host,Port,Ext);
 	
+	if (
+		con->StartTAPISession() && 
+		con->Reconnect(Host,Port,Ext) )
+	WaitingForMinimize=true;
 }
 
 void CBBjTAPIClientDlg::OnBnClickedSimuIncomingcall()

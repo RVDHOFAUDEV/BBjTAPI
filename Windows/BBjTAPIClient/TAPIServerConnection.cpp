@@ -120,7 +120,7 @@ switch (i)
 
 
 
-void CTAPIServerConnection::Reconnect(CString host,CString port, CString extension)
+BOOL CTAPIServerConnection::Reconnect(CString host,CString port, CString extension)
 {
 	LastMessage="Trying to connect to "+host;
 	dlg->UpdateData();
@@ -130,6 +130,7 @@ void CTAPIServerConnection::Reconnect(CString host,CString port, CString extensi
 	Close();
 	Create();
 	Connect(host,this->port);
+	return true;
 }
 
 
@@ -246,8 +247,10 @@ void CTAPIServerConnection::SelectAddress(int address)
 }
 
 
-void CTAPIServerConnection::StartTAPISession() 
+BOOL CTAPIServerConnection::StartTAPISession() 
 {
+
+	BOOL ret = true;
 	// Priority of media modes
 	static struct
 	{
@@ -283,7 +286,7 @@ void CTAPIServerConnection::StartTAPISession()
 
 	CTapiLine* pLine =(CTapiLine*)(DeviceObjects.GetAt(SelectedLine));
 	if (pLine == NULL)
-		return;
+		return false;
 
 	if (pLine->IsOpen())
 	{
@@ -321,8 +324,10 @@ void CTAPIServerConnection::StartTAPISession()
 		}
 
 		// Show an error
-		if (lResult != 0)
+		if (lResult != 0){
 			AfxMessageBox("Error opening line");
+			ret=false;
+		}
 		else
 		{
 			// Get the states we get notified on
@@ -339,14 +344,16 @@ void CTAPIServerConnection::StartTAPISession()
 				dwStates &= lpCaps->dwLineStates;
 			lResult = pLine->SetStatusMessages(dwStates, dwAddrSt);
 			
-			if (lResult != 0)
+			if (lResult != 0){
+				ret = false;
 				AfxMessageBox("Error lineSetStatusMessages");
+			}
 
 			OpenLine = pLine;
 			
 		}
 	}
-	
+	return ret;
 
 }
 

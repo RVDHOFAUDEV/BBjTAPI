@@ -17,7 +17,7 @@ public:
 	void OnConnect(int nErrorCode);
 	void OnClose(int nErrorCode);
 	void SocketErrorMessage();
-	void Reconnect(CString host, CString port, CString extension);
+	BOOL Reconnect(CString host, CString port, CString extension);
 
 public:
 		BOOL m_fTryingConnect;
@@ -40,6 +40,6 @@ public:
 	void BuildTAPIData(void);
 	void SelectLine(int line);
 	void SelectAddress(int address);
-	void StartTAPISession(void);
+	BOOL StartTAPISession(void);
 	void MakeCall(CString);
 };

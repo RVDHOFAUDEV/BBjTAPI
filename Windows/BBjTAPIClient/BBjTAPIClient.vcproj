@@ -196,6 +196,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DebugLog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\registry.cpp"
 				>
 			</File>
@@ -243,6 +247,10 @@
 			</File>
 			<File
 				RelativePath=".\BBjTAPIClientDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DebugLog.h"
 				>
 			</File>
 			<File

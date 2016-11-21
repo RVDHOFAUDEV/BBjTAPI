@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "BBjTAPIClient.h"
+
 #include "BBjTAPIClientDlg.h"
 #include "registry.h"
 
@@ -34,7 +35,7 @@ protected:
 };
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
-{
+{	
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
@@ -61,6 +62,7 @@ CBBjTAPIClientDlg::CBBjTAPIClientDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	WaitingForMinimize=false;
+
 }
 
 void CBBjTAPIClientDlg::DoDataExchange(CDataExchange* pDX)
@@ -153,8 +155,20 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	BringWindowToTop();
 	CenterWindow();
 
+	
 
 	CString tmp;
+	m_fDebug=FALSE;
+
+	tmp=this->getCmdLineOption("-debug");
+	if (tmp > ""){
+		m_fDebug = TRUE;
+		
+		logger =new CDebugLog(tmp);
+		logger->Log("Started with debug mode");
+
+
+	}
 
 	tmp=this->getCmdLineOption("-S");
 	if (tmp.GetLength()>0)
@@ -181,6 +195,7 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	
 	con	= new CTAPIServerConnection();
 	con->dlg = this;
+	con->BuildTAPIData();
 	
 	cbDevice.ResetContent();
 	for (int i=0; i<con->Devices.GetSize(); i++)
@@ -376,4 +391,10 @@ void CBBjTAPIClientDlg::OnBnClickedCancel2()
 	int a= AfxMessageBox("Shutdown TAPI Client?",MB_YESNO);
 	if (a==6)
 		this->EndDialog(0);
+}
+
+void CBBjTAPIClientDlg::Log(CString msg)
+{
+	if (this->m_fDebug)
+		this->logger->Log(msg);
 }

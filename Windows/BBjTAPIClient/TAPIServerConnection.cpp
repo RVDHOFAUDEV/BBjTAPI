@@ -12,7 +12,6 @@ CTAPIServerConnection::CTAPIServerConnection(void)
 		m_fTryingConnect=FALSE;
 		m_fConnected=FALSE;
 		OpenLine=NULL;
-		BuildTAPIData();
 		
 		
 }
@@ -122,6 +121,7 @@ switch (i)
 
 BOOL CTAPIServerConnection::Reconnect(CString host,CString port, CString extension)
 {
+	dlg->Log("Trying to connect to "+host);
 	LastMessage="Trying to connect to "+host;
 	dlg->UpdateData();
 	this->host = host;
@@ -130,6 +130,7 @@ BOOL CTAPIServerConnection::Reconnect(CString host,CString port, CString extensi
 	Close();
 	Create();
 	Connect(host,this->port);
+	dlg->Log("connecting");
 	return true;
 }
 
@@ -148,23 +149,28 @@ void CTAPIServerConnection::OnReceive(int nErrorCode)
 	CString msg = buf;
 	if (msg.Left(8)=="OUTCALL:") {
 		CString Number = msg.Right(msg.GetLength()-8);
+		dlg->Log("Making call to "+Number);
 		MakeCall(Number);
 	}
 	//m_pData->OnReceive(buf);
+	
 	
 }
 
 void CTAPIServerConnection::OnConnect(int nErrorCode)
 {
 	if (nErrorCode == 0){
+		dlg->Log("connected");
 		m_fConnected=TRUE;
 		LastMessage="";
 		CString cmd = "REG:"+this->extension+"\n";
 		Send(cmd.GetBuffer(),cmd.GetLength());
+		dlg->Log("registering as "+this->extension);
 	}
 	else
 	{
 		LastMessage="Can't connect to Server";
+		dlg->Log("Can't connect to Server");
 	}
 
 	if (dlg != NULL){
@@ -179,6 +185,7 @@ void CTAPIServerConnection::OnClose(int nErrorCode)
 	if (dlg != NULL){
 		dlg->UpdateDisplay();
 	}
+	dlg->Log("disconnected");
 }
 
 void CTAPIServerConnection::IncomingCall(CString number)
@@ -186,22 +193,26 @@ void CTAPIServerConnection::IncomingCall(CString number)
 	if (m_fConnected){
 		CString m = "CALL:"+number+"\n";
 		Send(m.GetBuffer(),m.GetLength());
+		dlg->Log("signaling incoming call from "+number+" to server");
 	};
 
 
 }
 
-void CTAPIServerConnection::BuildTAPIData()
+void CTAPIServerConnection::BuildTAPIData(void)
 {
 
     // Initialize a connection with TAPI and determine if there 
     // are any TAPI complient devices installed.
+
+	dlg->Log("---preparing TAPI connection---");
+
     if (GetTAPIConnection()->Init("BBjTAPIClient", 
 			RUNTIME_CLASS(CMyLine), NULL, RUNTIME_CLASS(CMyCall),
 			RUNTIME_CLASS(CMyPhone)) != 0 ||
         GetTAPIConnection()->GetLineDeviceCount() == 0)
     {
-		
+		dlg->Log("No TAPI devices found.");
         AfxMessageBox ("There are no TAPI devices installed!");
 		return;
     }
@@ -217,6 +228,7 @@ void CTAPIServerConnection::BuildTAPIData()
 		if (pLine != NULL)
 		{
 			Devices.Add(pLine->GetLineName());
+			dlg->Log("found TAPI line "+pLine->GetLineName());
 			DeviceObjects.Add(pLine);
 		}
 	}		
@@ -230,6 +242,8 @@ void CTAPIServerConnection::SelectLine(int line)
 	SelectedLine = line;
 	CTapiLine* pLine = (CTapiLine*)(DeviceObjects.GetAt(line));
 
+	dlg->Log("selected TAPI line "+pLine->GetLineName());
+
 	for (DWORD dwAddress = 0; dwAddress < pLine->GetAddressCount(); dwAddress++)
 		{
 			CTapiAddress* pAddr = pLine->GetAddress(dwAddress);
@@ -237,6 +251,7 @@ void CTAPIServerConnection::SelectLine(int line)
 			if (strName.IsEmpty())
 				strName.Format("Address %ld", dwAddress);
 			Addresses.Add(strName);
+			dlg->Log("found TAPI "+strName);
 			AddressObjects.Add(pAddr);
 		}
 }
@@ -244,12 +259,17 @@ void CTAPIServerConnection::SelectLine(int line)
 void CTAPIServerConnection::SelectAddress(int address)
 {
 	SelectedAddress = address;
+	
+	char* x = new char[100];
+	CString ch = _itoa (address,x,10);
+	dlg->Log("selected "+ch);
 }
 
 
 BOOL CTAPIServerConnection::StartTAPISession() 
 {
 
+	dlg->Log("starting TAPI session");
 	BOOL ret = true;
 	// Priority of media modes
 	static struct
@@ -282,17 +302,21 @@ BOOL CTAPIServerConnection::StartTAPISession()
 			pl->Close();
 			OpenLine = NULL;
 		}
+		dlg->Log("closed prior open line");
 	}
 
 	CTapiLine* pLine =(CTapiLine*)(DeviceObjects.GetAt(SelectedLine));
 	if (pLine == NULL)
+	{
+		dlg->Log("no line selected");
 		return false;
+	}
 
 	if (pLine->IsOpen())
 	{
 		pLine->Close();
 	}
-	else
+	
 	{
 		// Open for ALL media modes first.
 		DWORD dwMediaMode = 0;
@@ -302,6 +326,7 @@ BOOL CTAPIServerConnection::StartTAPISession()
 
 		// Open the line
 		LONG lResult = pLine->Open (LINECALLPRIVILEGE_OWNER | LINECALLPRIVILEGE_MONITOR, dwMediaMode);
+		dlg->Log("line opened ");
 
 		// UNIMODEM only allows ONE media mode to be chosen.. pick the best one available.
 		if (lResult == LINEERR_INVALMEDIAMODE)
@@ -312,6 +337,7 @@ BOOL CTAPIServerConnection::StartTAPISession()
 				if (dwMediaMode & g_MediaModes[i].dwMediaMode)
 				{
 					lResult = pLine->Open (LINECALLPRIVILEGE_OWNER | LINECALLPRIVILEGE_MONITOR, g_MediaModes[i].dwMediaMode);
+					dlg->Log("setting media mode");
 					if (lResult == 0)
 					{	
 						CString e="Forced to open line with media mode";
@@ -344,6 +370,7 @@ BOOL CTAPIServerConnection::StartTAPISession()
 				dwStates &= lpCaps->dwLineStates;
 			lResult = pLine->SetStatusMessages(dwStates, dwAddrSt);
 			
+			dlg->Log("registered to get status messages");
 			if (lResult != 0){
 				ret = false;
 				AfxMessageBox("Error lineSetStatusMessages");
@@ -399,6 +426,8 @@ void CTAPIServerConnection::MakeCall(CString m_strNumber)
 		}
 	}
 	*/ 
+			
+	dlg->Log("making call to "+m_strNumber);
 	CTapiCall* pCall = NULL;
 	LONG lResult = pLine->MakeCall(&pCall, m_strNumber, 0, lpCallParams);
 	if (lResult != 0)

@@ -3,7 +3,7 @@
 
 #pragma once
 #define UM_NEWCALL		 (WM_USER + 100)
-
+#include "DebugLog.h"
 #include "TrayDialog.h"
 #include "afxwin.h"
 #include "TAPIServerConnection.h"
@@ -47,6 +47,8 @@ public:
 	CString Host;
 	CString Status;
 	BOOL WaitingForMinimize;
+	BOOL m_fDebug;
+	CDebugLog* logger;
 
 
 	afx_msg void OnBnClickedSimuIncomingcall();
@@ -63,4 +65,7 @@ public:
 	CEdit edPort;
 	CEdit edExt;
 	afx_msg void OnBnClickedCancel2();
+
+	void Log(CString msg);
+
 };

@@ -239,7 +239,7 @@ void CTrayDialog::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if(m_bMinimizeToTray)
 	{
-		if ((nID & 0xFFF0) == SC_MINIMIZE)
+		if ((nID & 0xFFF0) == SC_MINIMIZE || (nID & 0xFFF0) == SC_CLOSE)
 		{
 		
 			if( TrayShow())

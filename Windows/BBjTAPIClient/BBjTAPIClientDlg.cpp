@@ -150,7 +150,8 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 	TraySetIcon(IDR_MAINFRAME);
 	TraySetToolTip("BBj TAPI Client");
 	//TraySetMenu(IDR_MENU1);
-
+	BringWindowToTop();
+	CenterWindow();
 
 
 	CString tmp;

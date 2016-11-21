@@ -272,8 +272,11 @@ void CTrayDialog::OnTrayLButtonDown(CPoint pt)
 void CTrayDialog::OnTrayLButtonDblClk(CPoint pt)
 {
 	if(m_bMinimizeToTray)
-		if(TrayHide())
+		if(TrayHide()){
 			this->ShowWindow(SW_SHOW);
+			this->BringWindowToTop();
+			this->CenterWindow();
+		}
 }
 
 void CTrayDialog::OnTrayRButtonDblClk(CPoint pt)

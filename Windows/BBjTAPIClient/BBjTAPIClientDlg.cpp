@@ -166,9 +166,7 @@ BOOL CBBjTAPIClientDlg::OnInitDialog()
 		
 		logger =new CDebugLog(tmp);
 		logger->Log("Started with debug mode");
-
-
-	}
+	} 
 
 	tmp=this->getCmdLineOption("-S");
 	if (tmp.GetLength()>0)
@@ -303,8 +301,10 @@ void CBBjTAPIClientDlg::OnBnClickedOk()
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Host",Host);
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Port",Port);
 	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Ext",Ext);
-	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device",con->Devices.GetAt(con->SelectedLine));
-	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address",con->Addresses.GetAt(con->SelectedAddress));
+	CString x = con->Devices.GetAt(con->SelectedLine);
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Device",x);
+	x=con->Addresses.GetAt(con->SelectedAddress);
+	SetRegistryKey(HKEY_CURRENT_USER,"SOFTWARE\\BASIS\\BBjTAPIClient\\Address",x);
 
 	
 	if (

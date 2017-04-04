@@ -239,6 +239,8 @@ void CTAPIServerConnection::SelectLine(int line)
 	Addresses.RemoveAll();
 	AddressObjects.RemoveAll();
 
+	dlg->Log("selected TAPI line "+line);
+
 	SelectedLine = line;
 	CTapiLine* pLine = (CTapiLine*)(DeviceObjects.GetAt(line));
 
@@ -324,6 +326,9 @@ BOOL CTAPIServerConnection::StartTAPISession()
 		if (lpCaps)
 			dwMediaMode = (lpCaps->dwMediaModes & ~LINEMEDIAMODE_UNKNOWN);
 
+
+		dlg->Log("opening TAPI line "+pLine->GetLineName());
+
 		// Open the line
 		LONG lResult = pLine->Open (LINECALLPRIVILEGE_OWNER | LINECALLPRIVILEGE_MONITOR, dwMediaMode);
 		dlg->Log("line opened ");
@@ -351,6 +356,10 @@ BOOL CTAPIServerConnection::StartTAPISession()
 
 		// Show an error
 		if (lResult != 0){
+			dlg->Log("Error opening line.");
+			CString r;
+			_itoa(lResult,r.GetBuffer(),10);
+			dlg->Log(r);
 			AfxMessageBox("Error opening line");
 			ret=false;
 		}

@@ -117,7 +117,7 @@ namespace BBjTapiClient.pages {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/BBjTapiClient;component/pages/extras.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/BBjTAPIClient;component/pages/extras.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\pages\extras.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

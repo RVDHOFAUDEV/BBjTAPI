@@ -79,14 +79,16 @@ namespace BBjTapiClient.viewmodels
             get { return port; }
             set
             {
-                value = Regex.Replace(value, @"[^\d]", "");
-                SetProperty(ref port, value);
-                if (App.isPreparationPhase == false)
+                if (value != null)
                 {
-                    App.network.disconnect();
-                    App.network.initialize(); // method code continues before call is completed - is okay here
+                    value = Regex.Replace(value, @"[^\d]", "");
+                    SetProperty(ref port, value);
+                    if (App.isPreparationPhase == false)
+                    {
+                        App.network.disconnect();
+                        App.network.initialize(); // method code continues before call is completed - is okay here
+                    }
                 }
-                
             }
         }
 
@@ -224,13 +226,14 @@ namespace BBjTapiClient.viewmodels
             IsTapiSessionConnected = false; // below tapi line and address selection
             Server = "localhost";
             Port = "12000";
-            Extension = "26";
+            Extension = "";
             Lines = new ObservableCollection<string>();
             Line = "";
             Addresses = new ObservableCollection<string>();
             Address = "";
             Debugfilename = "";
             CanMakeCall = true;
+            App.log("Set default settings");
         }
 
     }

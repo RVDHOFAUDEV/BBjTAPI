@@ -28,7 +28,7 @@ namespace BBjTapiClient.utils
 
         public Tapi()
         {
-            App.log(String.Format("using adapter {0}", adapter));
+            App.log(String.Format("Using adapter '{0}'", adapter));
             mgr = new TapiManager("BBjTAPIClient.Net");
         }
 

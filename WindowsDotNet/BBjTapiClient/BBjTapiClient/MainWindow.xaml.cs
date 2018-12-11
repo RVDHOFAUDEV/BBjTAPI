@@ -47,12 +47,15 @@ namespace BBjTapiClient
             setMainWindowTitle();
             App.displayPage("binding"); // main settings
             App.network.initialize(); // method code continues before call is completed - is okay here
-            App.isPreparationPhase = false; //Preparation done - user interaction allowed
-            if (App.Setup.Extension == "" || App.Setup.Line=="")
+            
+            string line = App.Setup.Line != null ? App.Setup.Line : "";
+            if (App.Setup.Extension == "" | line=="")
             {
                 showApplication(); // only display the app on the desktop if the setup is incomplete
                 virgin = true;
             }
+
+            App.isPreparationPhase = false; //Preparation done - user interaction allowed
             startTimer();
         }
 

@@ -58,6 +58,9 @@ namespace BBjTapiClient
         public static System.Threading.Mutex mutex;
         public static bool createdNewMutex;
 
+        /* log */
+        public static List<string> backlog = new List<string>();
+        public static bool isWorkoutBacklog = false;
 
         /* open a page */
         public static void displayPage(string pageName)
@@ -83,12 +86,29 @@ namespace BBjTapiClient
         /* log information */
         public static void log(String message)
         {
-            if (message!= lastMessage)
+            if (message != lastMessage)
             {
                 lastMessage = message;
+                string line = DateTime.Now.ToLocalTime().ToString() + " " + message;
                 try
                 {
-                    string line = DateTime.Now.ToLocalTime().ToString() + " " + message;
+                    if (backlog.Count() > 0 && isWorkoutBacklog)
+                    {
+                        foreach (var item in backlog)
+                        {
+                            mainWin.logbox.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Send, (Action)
+                                delegate ()
+                                {
+                                    if (logCount > 255)
+                                        mainWin.logbox.Items.RemoveAt(0);
+                                    mainWin.logbox.Items.Add(item);
+                                    mainWin.logbox.SelectedIndex = mainWin.logbox.Items.Count - 1;
+                                    mainWin.logbox.ScrollIntoView(mainWin.logbox.SelectedItem);
+                                }
+                            );
+                        }
+                        backlog.Clear();
+                    }
                     mainWin.logbox.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Send, (Action)
                         delegate ()
                         {
@@ -97,11 +117,15 @@ namespace BBjTapiClient
                             mainWin.logbox.Items.Add(line);
                             mainWin.logbox.SelectedIndex = mainWin.logbox.Items.Count - 1;
                             mainWin.logbox.ScrollIntoView(mainWin.logbox.SelectedItem);
+                            isWorkoutBacklog = true;
                         }
                     );
                     logCount++;
                 }
-                catch { }
+                catch
+                {
+                    backlog.Add(line);
+                }
             }
         }
 
@@ -116,50 +140,54 @@ namespace BBjTapiClient
             registry.readAll(); // try to override the defaults with the values stored in the registry
             string arg, value;
             bool isShowPossibleArgs = false;
-            for (int i = 0; i != e.Args.Length; ++i)
+            if (e.Args.Length > 0)
             {
-                value = "";
-                arg = e.Args[i]; // -S127.0.0.1
-                if (arg.StartsWith("-"))
+                App.log("Overriding settings using startup arguments");
+                for (int i = 0; i != e.Args.Length; ++i)
                 {
-                    if (arg.Length > 2)
+                    value = "";
+                    arg = e.Args[i]; // -S127.0.0.1
+                    if (arg.StartsWith("-"))
                     {
-                        value = arg.Substring(2);
-                        if (value != "")
+                        if (arg.Length > 2)
                         {
-                            switch (arg.Substring(0, 2))
+                            value = arg.Substring(2);
+                            if (value != "")
                             {
-                                case "-S":
-                                    App.Setup.Server = value;
-                                    break;
-                                case "-P":
-                                    App.Setup.Port = value;
-                                    break;
-                                case "-E":
-                                    App.Setup.Extension = value;
-                                    break;
-                                case "-D":
-                                    App.Setup.Line = value;
-                                    break;
-                                case "-A":
-                                    App.Setup.Address = value;
-                                    break;
-                                default:
-                                    App.log("Unknown arg received: " + arg);
-                                    isShowPossibleArgs = true;
-                                    break;
+                                switch (arg.Substring(0, 2))
+                                {
+                                    case "-S":
+                                        App.Setup.Server = value;
+                                        break;
+                                    case "-P":
+                                        App.Setup.Port = value;
+                                        break;
+                                    case "-E":
+                                        App.Setup.Extension = value;
+                                        break;
+                                    case "-D":
+                                        App.Setup.Line = value;
+                                        break;
+                                    case "-A":
+                                        App.Setup.Address = value;
+                                        break;
+                                    default:
+                                        App.log("Unknown arg received: " + arg);
+                                        isShowPossibleArgs = true;
+                                        break;
+                                }
                             }
                         }
+                        if (arg.Length > 6)
+                        {
+                            if (arg.Substring(0, 6) == "-debug")
+                                App.Setup.Debugfilename = arg.Substring(6);
+                        }
                     }
-                    if (arg.Length > 6)
+                    else
                     {
-                        if (arg.Substring(0, 6) == "-debug")
-                            App.Setup.Debugfilename = arg.Substring(6);
+                        App.log("Invalid arg format: " + arg);
                     }
-                }
-                else
-                {
-                    App.log("Invalid arg format: " + arg);
                 }
             }
             if (isShowPossibleArgs)

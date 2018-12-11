@@ -30,7 +30,7 @@ namespace BBjTapiClient.utils
             try
             { 
                 subRegistryKey = baseRegistryKey.CreateSubKey("SOFTWARE\\BASIS\\BBjTAPIClient");
-                subRegistryKey.SetValue("BBjTAPIClientNetLastLifeSignal", DateTime.Now.ToString());
+                subRegistryKey.SetValue("RegTestEntryBBjTAPIClient.Net", DateTime.Now.ToString());
                 isValid = true;
             }
             catch (Exception ex)
@@ -95,23 +95,51 @@ namespace BBjTapiClient.utils
             if (isValid)
             {
                 string value = "";
+                bool exi = false;
 
                 value = read("Device");
-                if (value != "") App.Setup.Line = value;
+                if (value != "")
+                {
+                    App.Setup.Line = value;
+                    App.log(String.Format("Read Line '{0}' from registry", value));
+                    exi = true;
+                }
 
                 value = read("Address");
-                if (value != "") App.Setup.Address = value;
+                if (value != "")
+                {
+                    App.Setup.Address = value;
+                    App.log(String.Format("Read Address '{0}' from registry", value));
+                    exi = true;
+                }
 
                 value = read("Ext");
-                if (value != "") App.Setup.Extension = value;
+                if (value != "")
+                {
+                    App.Setup.Extension = value;
+                    App.log(String.Format("Read Extension '{0}' from registry", value));
+                    exi = true;
+                }
 
                 value = read("Host");
-                if (value != "") App.Setup.Server = value;
+                if (value != "")
+                {
+                    App.Setup.Server = value;
+                    App.log(String.Format("Read Host '{0}' from registry", value));
+                    exi = true;
+                }
 
                 value = read("Port");
-                if (value != "") App.Setup.Port = value;
-
-                App.log("Read settings from registry");
+                if (value != "")
+                {
+                    App.Setup.Port = value;
+                    App.log(String.Format("Read Port '{0}' from registry", value));
+                    exi = true;
+                }
+                if (exi)
+                    App.log("Read settings from registry");
+                else
+                    App.log("No overriding settings in registry available yet.");
             }
             else
                 App.log("Unable to read all settings of the registry");

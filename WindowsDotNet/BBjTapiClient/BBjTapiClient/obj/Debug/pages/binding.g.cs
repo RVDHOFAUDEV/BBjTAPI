@@ -83,7 +83,7 @@ namespace BBjTapiClient.pages {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/BBjTapiClient;component/pages/binding.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/BBjTAPIClient;component/pages/binding.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\pages\binding.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

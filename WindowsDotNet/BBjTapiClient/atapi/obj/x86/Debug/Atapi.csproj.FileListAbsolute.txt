@@ -1,0 +1,6 @@
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\bin\x86\Debug\Atapi.XML
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\bin\x86\Debug\Atapi.dll
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\bin\x86\Debug\Atapi.pdb
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\obj\x86\Debug\Atapi.csprojResolveAssemblyReference.cache
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\obj\x86\Debug\Atapi.dll
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\obj\x86\Debug\Atapi.pdb

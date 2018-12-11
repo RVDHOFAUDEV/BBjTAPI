@@ -1,0 +1,171 @@
+﻿/*
+ * driven by madness
+ * App start goes here!
+ */
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+
+using BBjTapiClient.utils;
+using BBjTapiClient.viewmodels;
+using System.Windows.Controls;
+
+namespace BBjTapiClient
+{
+    /// <summary>
+    /// Interaction logic for App.xaml
+    /// </summary>
+    /// 
+    public partial class App : Application
+    {
+        public static string aim = "BBjTAPIClient - TSP communication client - .Net";
+
+        public static bool isPreparationPhase = true;
+        public static bool isShuttingDown = false;
+        public static bool isRefreshingTapiSession = false;
+
+        /* logging */
+        public static MainWindow mainWin;
+        public static int logCount = 0;
+        public static string lastMessage = "";
+
+        /* engine */
+        public static Tapi tapi; // adapter = "atapi"
+
+        /* div */
+        public static Network network;
+        public static RegEdit registry;
+        public static Int64 tickCount = 0;
+        public static string lastDisplayedPageName = "";
+
+        /* settings/parameter input output handling */
+        private static Settings setup;
+        public static Settings Setup
+        {
+            get { return setup; }
+            set { setup = value; }
+        }
+
+        /* page */
+        public static Page bindingPage;
+        public static Page extrasPage;
+
+        /* avoid multiple execution */
+        public static System.Threading.Mutex mutex;
+        public static bool createdNewMutex;
+
+
+        /* open a page */
+        public static void displayPage(string pageName)
+        {
+            if (pageName != App.lastDisplayedPageName)
+            {
+                if (pageName == "binding")
+                {
+                    if (bindingPage == null)
+                        bindingPage = new pages.binding();
+                    App.mainWin.mainFrame.Navigate(bindingPage);
+                }
+                if (pageName == "extras")
+                {
+                    if (extrasPage == null)
+                        extrasPage = new pages.extras();
+                    App.mainWin.mainFrame.Navigate(extrasPage);
+                }
+            }
+            App.lastDisplayedPageName = pageName;
+        }
+
+        /* log information */
+        public static void log(String message)
+        {
+            if (message!= lastMessage)
+            {
+                lastMessage = message;
+                try
+                {
+                    string line = DateTime.Now.ToLocalTime().ToString() + " " + message;
+                    mainWin.logbox.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Send, (Action)
+                        delegate ()
+                        {
+                            if (logCount > 255)
+                                mainWin.logbox.Items.RemoveAt(0);
+                            mainWin.logbox.Items.Add(line);
+                            mainWin.logbox.SelectedIndex = mainWin.logbox.Items.Count - 1;
+                            mainWin.logbox.ScrollIntoView(mainWin.logbox.SelectedItem);
+                        }
+                    );
+                    logCount++;
+                }
+                catch { }
+            }
+        }
+
+
+        /* start - process arguments */
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            tapi = new Tapi();
+            network = new Network();
+            registry = new RegEdit();
+            setup = new Settings(); // sets defaults, load setup from registry, override setup with values given by the starting args
+            registry.readAll(); // try to override the defaults with the values stored in the registry
+            string arg, value;
+            bool isShowPossibleArgs = false;
+            for (int i = 0; i != e.Args.Length; ++i)
+            {
+                value = "";
+                arg = e.Args[i]; // -S127.0.0.1
+                if (arg.StartsWith("-"))
+                {
+                    if (arg.Length > 2)
+                    {
+                        value = arg.Substring(2);
+                        if (value != "")
+                        {
+                            switch (arg.Substring(0, 2))
+                            {
+                                case "-S":
+                                    App.Setup.Server = value;
+                                    break;
+                                case "-P":
+                                    App.Setup.Port = value;
+                                    break;
+                                case "-E":
+                                    App.Setup.Extension = value;
+                                    break;
+                                case "-D":
+                                    App.Setup.Line = value;
+                                    break;
+                                case "-A":
+                                    App.Setup.Address = value;
+                                    break;
+                                default:
+                                    App.log("Unknown arg received: " + arg);
+                                    isShowPossibleArgs = true;
+                                    break;
+                            }
+                        }
+                    }
+                    if (arg.Length > 6)
+                    {
+                        if (arg.Substring(0, 6) == "-debug")
+                            App.Setup.Debugfilename = arg.Substring(6);
+                    }
+                }
+                else
+                {
+                    App.log("Invalid arg format: " + arg);
+                }
+            }
+            if (isShowPossibleArgs)
+                App.log("Valid args are : -S.., -P.., -E.., -D.., -A.., -debug..");
+        }
+
+    }
+}
+

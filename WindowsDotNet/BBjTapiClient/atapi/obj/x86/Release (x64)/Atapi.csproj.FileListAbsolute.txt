@@ -1,0 +1,6 @@
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\bin\x64\Release\Atapi.XML
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\bin\x64\Release\Atapi.dll
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\bin\x64\Release\Atapi.pdb
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\obj\x86\Release (x64)\Atapi.csprojResolveAssemblyReference.cache
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\obj\x86\Release (x64)\Atapi.dll
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\obj\x86\Release (x64)\Atapi.pdb

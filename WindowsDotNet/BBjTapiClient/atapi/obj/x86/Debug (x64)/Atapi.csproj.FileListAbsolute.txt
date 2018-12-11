@@ -1,0 +1,11 @@
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\bin\x64\Debug\Atapi.XML
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\bin\x64\Debug\Atapi.dll
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\bin\x64\Debug\Atapi.pdb
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\obj\x86\Debug (x64)\Atapi.dll
+D:\CarITDMS\NET Programs\BBjTapiClient\atapi\obj\x86\Debug (x64)\Atapi.pdb
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\bin\x64\Debug\Atapi.XML
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\bin\x64\Debug\Atapi.dll
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\bin\x64\Debug\Atapi.pdb
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\obj\x86\Debug (x64)\Atapi.csprojResolveAssemblyReference.cache
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\obj\x86\Debug (x64)\Atapi.dll
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\atapi\obj\x86\Debug (x64)\Atapi.pdb

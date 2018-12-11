@@ -70,6 +70,12 @@ class public BBjTAPIServerData
         if len(cmd$)>5 and cmd$(1,5)="CALL:" then
             #reportIncomingCall(sock$,cmd$(6))
         fi
+        if len(cmd$)>11 and cmd$(1,11)="TSPBINDING:" then
+            #storeTSPBinding(sock$,cmd$(12))
+        fi
+        if len(cmd$)>12 and cmd$(1,12)="ALLBINDINGS:" then
+            #storeAllBindings(sock$,cmd$(13))
+        fi
     methodend
 
     method private void register(BBjString sock$, BBjString ext$)
@@ -109,7 +115,76 @@ class public BBjTAPIServerData
             #Ns!.setValue("I"+ext$,number$)
         fi
     methodend
-
+	
+	
+	REM /**
+	REM  * Option to store the selected line and address in the context of the extension/identification.
+	REM  * These information could be reused to start BBjTAPIClient.exe.
+	REM  * This is an advantage in a load balanced server environment.
+	REM  */
+    method private void storeTSPBinding(BBjString sock$, BBjString stream$)
+        declare BBjVector v!
+		ext!=#Socket2Ext!.get(sock$)
+        if ext!<>null() then
+			v!=new BBjVector(java.util.Arrays.asList(new java.lang.String(stream$).split("[|]")))
+			if v!.size()<3
+				print "Unable to handle tsp binding stream - insufficient stream"
+			else
+				extension$=cast(BBjString,v!.get(0))
+				line$=cast(BBjString,v!.get(1))
+				address$=cast(BBjString,v!.get(2))
+				REM /**
+				REM  * storing in DB goes here 
+				REM  */
+				print "storage info. of extension '"+extension$+"', line '"+line$+"', address '"+address$+"'!"
+			fi
+        fi
+    methodend
+	
+	
+	REM /**
+	REM  * Option to store all available line and address pairs in the business application.
+	REM  * The assignments of line address pairs to extensions (like Employee-IDs) could be managed 
+	REM  * at a central unit within the setup process and could reduce the effort to prepare
+	REM  * each workstation.
+	REM  */
+	method private void storeAllBindings(BBjString sock$,BBjString stream$)
+        declare BBjVector combies!
+        declare BBjVector segs!
+		ext!=#Socket2Ext!.get(sock$)
+        if ext!<>null() then
+			combies!=new BBjVector(java.util.Arrays.asList(new java.lang.String(stream$).split("[|]")))
+			if combies!.size()=0
+				print "Unable to handle stream about a collection of all available bindings - insufficient data"
+			else
+				for combie=0 to combies!.size()-1
+					lineAddressColl$=cast(BBjString,combies!.get(combie))
+					segs!=new BBjVector(java.util.Arrays.asList(new java.lang.String(lineAddressColl$).split("[~]")))
+					if segs!.size()>0
+						line$=cast(BBjString,segs!.get(0))
+						if segs!.size()>1
+							for address=1 to segs!.size()-1
+								address$=cast(BBjString,segs!.get(address))
+								REM /**
+								REM  * storing available LINE, ADDRESS combination in DB goes here 
+								REM  */
+								print "storage info. of line '"+line$+"', address '"+address$+"'!"
+							next address
+						else
+							REM /**
+							REM  * storing available LINE in DB goes here 
+							REM  */
+							print "retrieved TSP line information '"+line$+"'."
+						fi
+					else
+						print "received insufficient stream '"+stream$+"'!"
+					fi
+				next combie
+			fi
+        fi
+	methodend
+	
+	
     method public void dump()
         print #Socket2Ext!
         print #Ext2Socket!

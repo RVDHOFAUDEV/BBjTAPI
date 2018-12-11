@@ -1,0 +1,41 @@
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\bin\Release\BBjTapiClient.exe.config
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\bin\Release\BBjTapiClient.exe
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\bin\Release\BBjTapiClient.pdb
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\bin\Release\Atapi.dll
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\bin\Release\Atapi.xml
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\MainWindow.g.cs
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\pages\binding.g.cs
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\pages\welcome.g.cs
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\App.g.cs
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient_MarkupCompile.cache
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient_MarkupCompile.lref
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\MainWindow.baml
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\pages\binding.baml
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\pages\welcome.baml
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\StyleDictionary.baml
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.g.resources
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.Properties.Resources.resources
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.csproj.GenerateResource.Cache
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.exe
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.pdb
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\bin\Release\Atapi.pdb
+D:\CarITDMS\NET Programs\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.csprojResolveAssemblyReference.cache
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\MainWindow.g.cs
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\pages\binding.g.cs
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\pages\extras.g.cs
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\App.g.cs
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient_MarkupCompile.cache
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient_MarkupCompile.lref
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.exe
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.pdb
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Release\BBjTapiClient.exe.config
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Release\BBjTapiClient.exe
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Release\BBjTapiClient.pdb
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Release\Atapi.xml
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\MainWindow.baml
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\pages\binding.baml
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\pages\extras.baml
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\StyleDictionary.baml
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.g.resources
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.Properties.Resources.resources
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.csproj.GenerateResource.Cache

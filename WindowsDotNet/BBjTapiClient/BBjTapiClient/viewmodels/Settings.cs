@@ -61,14 +61,16 @@ namespace BBjTapiClient.viewmodels
         public string Server
         {
             get { return server; }
-            set {
+            set
+            {
+                value = value != null ? value : "";
                 SetProperty(ref server, value);
                 if (App.isPreparationPhase == false)
                 {
                     App.network.disconnect();
                     App.network.initialize(); // method code continues before call is completed - is okay here
                 }
-                
+
             }
         }
 
@@ -79,15 +81,13 @@ namespace BBjTapiClient.viewmodels
             get { return port; }
             set
             {
-                if (value != null)
+                value = value != null ? value : "";
+                value = Regex.Replace(value, @"[^\d]", "");
+                SetProperty(ref port, value);
+                if (App.isPreparationPhase == false)
                 {
-                    value = Regex.Replace(value, @"[^\d]", "");
-                    SetProperty(ref port, value);
-                    if (App.isPreparationPhase == false)
-                    {
-                        App.network.disconnect();
-                        App.network.initialize(); // method code continues before call is completed - is okay here
-                    }
+                    App.network.disconnect();
+                    App.network.initialize(); // method code continues before call is completed - is okay here
                 }
             }
         }
@@ -100,6 +100,7 @@ namespace BBjTapiClient.viewmodels
             get { return extension; }
             set
             {
+                value = value != null ? value : "";
                 SetProperty(ref extension, value);
                 if (App.isPreparationPhase == false)
                 {
@@ -117,6 +118,7 @@ namespace BBjTapiClient.viewmodels
             get { return lines; }
             set
             {
+                value = value != null ? value : new ObservableCollection<string>();
                 SetProperty(ref lines, value);
             }
         }
@@ -129,6 +131,7 @@ namespace BBjTapiClient.viewmodels
             get { return line; }
             set
             {
+                value = value != null ? value : "";
                 SetProperty(ref line, value);
             }
         }
@@ -141,6 +144,7 @@ namespace BBjTapiClient.viewmodels
             get { return addresses; }
             set
             {
+                value = value != null ? value : new ObservableCollection<string>();
                 SetProperty(ref addresses, value);
             }
         }
@@ -153,6 +157,7 @@ namespace BBjTapiClient.viewmodels
             get { return address; }
             set
             {
+                value = value != null ? value : "";
                 SetProperty(ref address, value);
             }
         }
@@ -165,6 +170,7 @@ namespace BBjTapiClient.viewmodels
             get { return debugfilename; }
             set
             {
+                value = value != null ? value : "";
                 SetProperty(ref debugfilename, value);
             }
         }
@@ -177,6 +183,7 @@ namespace BBjTapiClient.viewmodels
             get { return phoneNumberIncoming; }
             set
             {
+                value = value != null ? value : "";
                 SetProperty(ref phoneNumberIncoming, value);
             }
         }
@@ -189,6 +196,7 @@ namespace BBjTapiClient.viewmodels
             get { return phoneNumberOutgoing; }
             set
             {
+                value = value != null ? value : "";
                 SetProperty(ref phoneNumberOutgoing, value);
             }
         }

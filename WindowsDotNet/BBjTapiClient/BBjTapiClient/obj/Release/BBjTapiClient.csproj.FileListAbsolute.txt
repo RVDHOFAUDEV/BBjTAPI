@@ -39,3 +39,4 @@ D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\StyleDictio
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.g.resources
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.Properties.Resources.resources
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.csproj.GenerateResource.Cache
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Release\BBjTapiClient.csprojResolveAssemblyReference.cache

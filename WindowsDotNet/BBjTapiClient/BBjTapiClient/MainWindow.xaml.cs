@@ -48,8 +48,7 @@ namespace BBjTapiClient
             App.displayPage("binding"); // main settings
             App.network.initialize(); // method code continues before call is completed - is okay here
             
-            string line = App.Setup.Line != null ? App.Setup.Line : "";
-            if (App.Setup.Extension == "" | line=="")
+            if (App.Setup.Extension == "" | App.Setup.Line == "")
             {
                 showApplication(); // only display the app on the desktop if the setup is incomplete
                 virgin = true;
@@ -178,12 +177,14 @@ namespace BBjTapiClient
         }
 
 
-        /* catch TAPI exceptions */
+        /* SECUNDARY global exception handler */
         static void Application_ThreadException(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
             if (e is TapiException)
-                System.Windows.Forms.MessageBox.Show(e.Message);
+                App.log("Tapi exception! " + e.Message);
+            else
+                App.log("Exception! " + e.Message);
         }
 
 

@@ -194,6 +194,14 @@ namespace BBjTapiClient
                 App.log("Valid args are : -S.., -P.., -E.., -D.., -A.., -debug..");
         }
 
+
+        /* PRIOR global exception handler */
+        private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            if (e.Exception != null)
+                App.log("Exception! " + e.Exception.Message);
+        }
+
     }
 }
 

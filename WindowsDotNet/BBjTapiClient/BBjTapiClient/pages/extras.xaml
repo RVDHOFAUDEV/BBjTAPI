@@ -57,7 +57,7 @@
         </GroupBox>
         <GroupBox Header="Miscellaneous">
             <StackPanel Orientation="Vertical" IsEnabled="{Binding IsNetworkConnectionEstablished, Source={x:Static project:App.Setup}}">
-                <Button x:Name="btnPostActual" Click="btnPostActual_Click" IsEnabled="{Binding IsTapiSessionConnected, Source={x:Static project:App.Setup}}">post actual TSP line address pair of the extension</Button>
+                <Button x:Name="btnPostActual" Click="btnPostActual_Click" IsEnabled="{Binding IsTapiSessionConnected, Source={x:Static project:App.Setup}}">post actual TSP line-address pair in context of the extension</Button>
                 <Button x:Name="btnPostAll" Click="btnPostAll_Click">post all available TSP lines and addresses</Button>
             </StackPanel>
         </GroupBox>

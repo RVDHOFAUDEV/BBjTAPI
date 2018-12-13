@@ -25,6 +25,18 @@ namespace BBjTapiClient.utils
         private ITapiCall currentIncomingCall;
         string callNumberAsSoonAsPossible = "";
         public string allLinesAndAddresses = "";
+        
+        /* changed event states */
+        bool lastCanMakeCall = false;
+        bool lastLocked = false;
+        bool lastLampState = false;
+        bool lastInService = false;
+        bool lastCanPickUpCall = false;
+        bool lastConnected = false;
+        string lastLineStates = "";
+        string lastAddressStates = "";
+        string lastAddressDetailStates = "";
+
 
         public Tapi()
         {
@@ -40,32 +52,35 @@ namespace BBjTapiClient.utils
             {
                 App.Setup.Lines.Clear();
                 App.Setup.Addresses.Clear();
-
                 currentLine = null;
-                lineCollection = mgr.Lines;
-
                 currentAddress = null;
                 addressCollection = null;
-
                 currentOutgoingCall = null;
                 currentIncomingCall = null;
-
                 allLinesAndAddresses = "";
-
+                lineCollection = mgr.Lines;
                 App.log(String.Format("{0}x TSP (Telephony service provider) lines detected", lineCollection.Count()));
                 foreach (TapiLine line in lineCollection)
                 {
                     App.Setup.Lines.Add(line.Name);
-                    line.Changed += Line_Changed;
-                    line.NewCall += Line_NewCall;
-                    line.Ringing += Line_Ringing;
+                    //line.Changed += Line_Changed;
+                    //line.NewCall += Line_NewCall;
+                    //line.Ringing += Line_Ringing;
                     allLinesAndAddresses += "|" + line.Name;
                     if (line.Addresses != null)
+                    {
                         if (line.Addresses.Count() > 0)
+                        {
                             foreach (TapiAddress adr in line.Addresses)
                             {
                                 allLinesAndAddresses += "~" + adr.Address;
                             }
+                        }
+                        else
+                            App.log(String.Format("Line '{0}' addresses are empty!", line.Name));
+                    }
+                    else
+                        App.log(String.Format("Line '{0}' addresses collection is NULL!", line.Name));
                 }
                 if (allLinesAndAddresses != "")
                     allLinesAndAddresses = allLinesAndAddresses.Substring(1);
@@ -88,8 +103,15 @@ namespace BBjTapiClient.utils
                 TapiLine item = lineCollection.FirstOrDefault(i => i.Name == lineName);
                 if (item != null)
                 {
+                    if (currentLine != null)
+                        if (currentLine.Name != lineName)
+                            stopSession();
+
                     currentLine = item;
-                    App.log(String.Format("Selected TAPI line '{0}'", currentLine.Name));
+                    currentLine.Changed += Line_Changed;
+                    currentLine.NewCall += Line_NewCall;
+                    currentLine.Ringing += Line_Ringing;
+                    App.log(String.Format("Selected TAPI line - current line is '{0}'", currentLine.Name));
                     addressCollection = (TapiAddress[])item.Addresses;
                     App.Setup.Addresses.Clear();
                     if (addressCollection.Count() == 1)
@@ -125,6 +147,7 @@ namespace BBjTapiClient.utils
                 if (item != null)
                 {
                     currentAddress = item;
+                    currentAddress.CallStateChanged += CurrentAddress_CallStateChanged;
                     App.log(String.Format("Selected TAPI address '{0}'", currentAddress.Address));
                     App.registry.write("Address", currentAddress.Address);
                 }
@@ -136,36 +159,103 @@ namespace BBjTapiClient.utils
         }
 
 
+        private void CurrentAddress_CallStateChanged(object sender, CallStateEventArgs e)
+        {
+            if (sender == currentAddress)
+            {
+                string divState = "";
+                string value = "";
+
+                value = Enum.GetName(typeof(CallState), e.CallState);
+                if (value!=null && value!="")
+                    divState += String.Format("- CallState '{0}'", value);
+
+                value = Enum.GetName(typeof(CallState), e.OldCallState);
+                if (value != null && value != "")
+                    divState += String.Format("- OldCallState '{0}'", value);
+
+                value = Enum.GetName(typeof(MediaModes), e.MediaModes);
+                if (value != null && value != "")
+                    divState += String.Format("- MediaModes '{0}'", value);
+
+                value = Enum.GetName(typeof(BearerModes), e.Call.BearerMode);
+                if (value != null && value != "")
+                    divState += String.Format("- BearerMode '{0}'", value);
+
+                value = e.Call.CalledId;
+                if (value != null && value != "")
+                    divState += String.Format("- CalledId '{0}'", value);
+
+                value = e.Call.CalledName;
+                if (value != null && value != "")
+                    divState += String.Format("- CalledName '{0}'", value);
+
+                value = e.Call.CallerId;
+                if (value != null && value != "")
+                    divState += String.Format("- CallerId '{0}'", value);
+
+                value = Enum.GetName(typeof(CallReasons), e.Call.CallReason);
+                if (value != null && value != "")
+                    divState += String.Format("- CallReason '{0}'", value);
+
+                value = e.Call.ConnectedId;
+                if (value != null && value != "") 
+                    divState += String.Format("- ConnectedId '{0}'", e.Call.ConnectedId);
+
+                value = e.Call.ConnectedName;
+                if (value != null && value != "")
+                    divState += String.Format("- ConnectedName '{0}'", value);
+
+                value = e.Call.DataRate.ToString();
+                if (value != null && value != "0")
+                    divState += String.Format("- DataRate (bps) '{0}'", value);
+
+                value = e.Call.Id.ToString();
+                if (value != null && value != "0")
+                    divState += String.Format("- Id '{0}'", value);
+
+                //e.Call.Features
+                //e.Call.MediaDetection
+
+                value = Enum.GetName(typeof(MediaModes), e.Call.MediaMode);
+                if (value != null && value != "")
+                    divState += String.Format("- MediaMode of Owner '{0}'", value);
+
+                value = Enum.GetName(typeof(Privilege), e.Call.Privilege);
+                if (value != null && value != "")
+                    divState += String.Format("- Privilege '{0}'", value);
+
+                value = e.Call.UserUserInfo;
+                if (value != null && value != "")
+                    divState += String.Format("- UserInfo '{0}'", value);
+
+                if (divState!=lastAddressDetailStates)
+                    App.log("TAPI Adress state changed " + divState);
+                lastAddressDetailStates = divState;
+            }
+            else
+                App.log("TAPI Address - raised State changed event belongs not to the current Address!");
+        }
+
+
         /* rock'n roll */
         public void startSession()
         {
             App.log("TAPI - Start session");
             if (!App.Setup.IsTapiSessionActive)
             {
+                App.Setup.IsTapiSessionActive = true;
                 if (currentLine != null)
                 {
-                    bool hasBeenOpened= false;
-                    try
+                    if (currentLine.IsOpen)
+                        App.log("TAPI line is already open. There is no need to open it!");
+                    else
                     {
-                        currentLine.Open(currentLine.Capabilities.MediaModes);
-                        App.log(String.Format("Opened TAPI line (MediaModes)"));
-                        hasBeenOpened = true;
-                    }
-                    catch (TapiException te)
-                    {
-                        App.log(te.Message);
-                    }
-                    catch (Exception ex)
-                    {
-                        App.log(ex.Message);
-                    }
-                    if (!hasBeenOpened)
-                    {
-                        App.log("Unable to open line in Capabilities MediaModes - attempt to open line in MediaModes.DataModem");
+                        bool hasBeenOpened = false;
                         try
                         {
-                            currentLine.Open(MediaModes.DataModem);
-                            App.log(String.Format("Opened TAPI line (alternative DataModem)"));
+                            currentLine.Open(currentLine.Capabilities.MediaModes);
+                            App.log(String.Format("Opened TAPI line '{0}' (MediaModes)",currentLine.Name));
                             hasBeenOpened = true;
                         }
                         catch (TapiException te)
@@ -176,14 +266,43 @@ namespace BBjTapiClient.utils
                         {
                             App.log(ex.Message);
                         }
-                    }
-                    if (hasBeenOpened)
-                    {
-                        App.Setup.IsTapiSessionActive = true;
-                        refreshStateFlags();
+                        if (!hasBeenOpened)
+                        {
+                            App.log("Unable to open line in Capabilities MediaModes - attempt to open line in MediaModes.DataModem");
+                            try
+                            {
+                                currentLine.Open(MediaModes.DataModem);
+                                App.log(String.Format("Opened TAPI line '{0}' (alternative DataModem)",currentLine.Name));
+                                hasBeenOpened = true;
+                            }
+                            catch (TapiException te)
+                            {
+                                App.log(te.Message);
+                            }
+                            catch (Exception ex)
+                            {
+                                App.log(ex.Message);
+                            }
+                        }
+                        if (hasBeenOpened)
+                        {
+                            refreshStateFlags();
+                            if (currentLine.IsOpen)
+                            {
+                                App.log(String.Format("Current line object 'IsOpen' state is '{0}'", currentLine.IsOpen));
+                            }
+                        }
+                        else
+                        {
+                            App.log("TAPI line couldn't been opened.");
+                        }
                     }
                 }
+                else
+                    App.log("Current line object is null");
             }
+            else
+                App.log("Session was marked as already active!");
         }
 
 
@@ -193,26 +312,30 @@ namespace BBjTapiClient.utils
             App.log("TAPI - Stop session");
             if (App.Setup.IsTapiSessionActive)
             {
+                App.Setup.IsTapiSessionActive = false;
                 if (currentLine != null)
                 {
                     if (currentLine.IsOpen)
                     {
                         currentLine.Close();
                         App.log(String.Format("TAPI line - closed"));
-                        App.Setup.IsTapiSessionActive = false;
                         refreshStateFlags();
                     }
+                    else
+                        App.log("Current line is not open! Hence it can'be closed.");
                 }
+                else
+                    App.log("Current TAPI line object is NULL. There is nothing to close.");
             }
-
         }
+
 
         /* drop outgoing call */
         public void dropCall()
         {
-            App.log("TAPI address - Dropping outgoing call");
             if (currentOutgoingCall != null)
             {
+                App.log("TAPI address - Dropping outgoing call");
                 if (currentOutgoingCall.Line != null)
                 {
                     if (currentOutgoingCall.Line.IsOpen)
@@ -266,7 +389,7 @@ namespace BBjTapiClient.utils
          */
         private void Line_Ringing(object sender, RingEventArgs e)
         {
-            App.log(String.Format("TAPI line - Ringing event - Count {0}", e.RingCount));
+            App.log(String.Format("TAPI line - Ringing event - Count '{0}'", e.RingCount));
         }
 
 
@@ -277,13 +400,13 @@ namespace BBjTapiClient.utils
         {
             currentIncomingCall = e.Call;
             string callingPhoneNumber = currentIncomingCall.CallerId;
-            App.log(String.Format("TAPI line - Incoming call event - Caller ID '{0}' - Called ID '{1} - Call {2} - Privilege {3}", currentIncomingCall.CallerId, currentIncomingCall.CalledId, e.Call, e.Privilege));
+            App.log(String.Format("TAPI line - Incoming call event - Caller ID '{0}' - Called ID '{1}' - Privilege '{2}' - Call '{3}'", currentIncomingCall.CallerId, currentIncomingCall.CalledId, e.Privilege, e.Call));
             App.network.incomingCall(callingPhoneNumber);
-            e.Call.Line.Monitor(); // will stop the execution of this method here using a inner exception.
-            currentIncomingCall.Line.Close();
-            currentIncomingCall.Line.Dispose();
-            currentIncomingCall.Dispose();
-            currentIncomingCall = null;
+            e.Call.Line.Monitor(); 
+            //currentIncomingCall.Line.Close();
+            //currentIncomingCall.Line.Dispose();
+            //currentIncomingCall.Dispose();
+            //currentIncomingCall = null;
         }
 
 
@@ -293,6 +416,8 @@ namespace BBjTapiClient.utils
             App.log("TAPI line - State changed event");
             if (sender == currentLine)
                 refreshStateFlags();
+            else
+                App.log("TAPI line - raised State changed event belongs not to the current line!");
         }
 
 
@@ -330,29 +455,60 @@ namespace BBjTapiClient.utils
         /* refresh the flags on line changed event */
         private void refreshStateFlags()
         {
+
+            bool state = false;
+            string divStates = "";
+
             /* on line level */
-            App.Setup.IsTapiSessionConnected = currentLine.Status.Connected; // must have
-                                                                             /* extras optional */
-                                                                             //bool state;
-                                                                             //state = currentLine.Status.Locked;
-                                                                             //if (state)
-                                                                             //    App.log(String.Format("TAPI line locked"));
-                                                                             //state = currentLine.Status.MessageWaitingLampState;
-                                                                             //App.log(String.Format("TAPI line message waiting lamp state is {0}", state));
-                                                                             //state = currentLine.Status.InService;
-                                                                             //if (state)
-                                                                             //    App.log(String.Format("TAPI line is in service"));
-                                                                             //state = (currentLine.Capabilities.SupportsForwarding && currentLine.IsOpen);
-                                                                             //App.log(String.Format("TAPI line support forwarding state is {0}", state));
-                                                                             /* on address level*/
-            App.Setup.CanMakeCall = (currentAddress != null && currentAddress.Status.CanMakeCall);
-            App.log(String.Format("TAPI address - Can make call state is '{0}'", App.Setup.CanMakeCall));
-            //state = (currentAddress != null && currentAddress.Status.CanPickupCall);
-            //App.log(String.Format("TAPI address can pickup call state is {0}", state));
-            //state = (currentAddress != null && currentAddress.Status.CanPickupCall);
-            //App.log(String.Format("TAPI address can pickup call state is {0}", state));
+            state = currentLine.Status.Connected;
+            if (state != lastConnected)
+                divStates += String.Format("- Connected '{0}'", state);
+            lastConnected= state;
+            App.Setup.IsTapiSessionConnected = state; // must have
+
+            state = currentLine.Status.Locked;
+            if (state != lastLocked)
+                divStates += String.Format("- Locked '{0}'", state);
+            lastLocked = state;
+
+            state = currentLine.Status.MessageWaitingLampState;
+            if (state!=lastLampState)
+                divStates += String.Format("- Waiting Lamp '{0}'", state);
+            lastLampState = state;
+
+            state = currentLine.Status.InService;
+            if (state!=lastInService)
+                divStates += String.Format("- In Service '{0}'", state);
+            lastInService= state;
+
+            //state = (currentLine.Capabilities.SupportsForwarding && currentLine.IsOpen);
+            //App.log(String.Format("TAPI line support forwarding state is {0}", state));
+
+            if (divStates!=lastLineStates && divStates!="")
+                App.log(String.Format("TAPI Line {0}", divStates));
+            lastLineStates = divStates;
+
+            /* on address level*/
+            divStates = "";
+            lastCanMakeCall = App.Setup.CanMakeCall;
+            if (App.Setup.CanMakeCall != lastCanMakeCall)
+                divStates += String.Format("- Can make call '{0}'", state);
+            
+            state = (currentAddress != null && currentAddress.Status.CanPickupCall);
+            if (state!=lastCanPickUpCall)
+                divStates += String.Format("- Can pick up call '{0}'", state);
+            lastCanPickUpCall= state;
+
+            App.Setup.CanMakeCall = (currentLine.Status.Connected && currentAddress != null && currentAddress.Status.CanMakeCall);
+
             //state = (currentAddress != null && currentAddress.Status.CanUnparkCall);
             //App.log(String.Format("TAPI address can unpark call state is {0}", state));
+
+            if (divStates!=lastAddressStates && divStates!="")
+                App.log(String.Format("TAPI Address {0}", divStates));
+            lastAddressStates = divStates;
+
+            /* process */
             if (callNumberAsSoonAsPossible != "" && App.Setup.CanMakeCall == true)
                 makeCall(callNumberAsSoonAsPossible);
             callNumberAsSoonAsPossible = "";

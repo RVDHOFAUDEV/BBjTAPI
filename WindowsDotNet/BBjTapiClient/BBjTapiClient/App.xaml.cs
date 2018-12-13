@@ -39,8 +39,8 @@ namespace BBjTapiClient
         /* div */
         public static Network network;
         public static RegEdit registry;
-        public static Int64 tickCount = 0;
         public static string lastDisplayedPageName = "";
+        public static bool startAppSilent = true;
 
         /* settings/parameter input output handling */
         private static Settings setup;
@@ -190,6 +190,8 @@ namespace BBjTapiClient
                     }
                 }
             }
+            else
+                startAppSilent = false; // if no args are given, show a BalloonTip briefly.
             if (isShowPossibleArgs)
                 App.log("Valid args are : -S.., -P.., -E.., -D.., -A.., -debug..");
         }

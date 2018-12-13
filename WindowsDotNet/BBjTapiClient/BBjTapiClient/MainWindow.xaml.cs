@@ -36,6 +36,8 @@ namespace BBjTapiClient
         private System.Windows.Forms.ContextMenuStrip contextMenu1Strip;
         private ToolStripItem menuItem1Strip;
         private ToolStripItem menuItem2Strip;
+        private bool timerCurrentlyRaised = false;
+        private Int64 tickCounter = 0;
 
         public MainWindow()
         {
@@ -56,6 +58,10 @@ namespace BBjTapiClient
 
             App.isPreparationPhase = false; //Preparation done - user interaction allowed
             startTimer();
+            if (!App.startAppSilent)
+            {
+                showBalloonTip("Telephony service provider client executed.");
+            }
         }
 
         #region trayIconApplicationHandling
@@ -167,13 +173,21 @@ namespace BBjTapiClient
         #endregion
 
         #region miscellaneous 
+        
         /* tray icon balloon tip */
         public void showBalloonTip(string text)
         {
             notifyIcon.BalloonTipText = text;
             notifyIcon.BalloonTipTitle = "BBjTAPIClient.Net";
             notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
+            notifyIcon.BalloonTipClicked += NotifyIcon_BalloonTipClicked;
             notifyIcon.ShowBalloonTip(1000);
+        }
+
+
+        private void NotifyIcon_BalloonTipClicked(object sender, EventArgs e)
+        {
+            showApplication();
         }
 
 
@@ -232,36 +246,46 @@ namespace BBjTapiClient
         /* check if BBjTapi was started in the time being / if the connection is available now */
         private void raiseTimer(object sender, ElapsedEventArgs e)
         {
-            if (App.isPreparationPhase == false)
+            if (!timerCurrentlyRaised)
             {
-                if (App.Setup.IsNetworkConnectionEstablished == false)
+                timerCurrentlyRaised = true;
+                if (App.isPreparationPhase == false)
                 {
-                    App.network.disconnect();
-                    App.network.initialize(); // async embedded - continues before initialize call is completed - is okay here 
-                }
-                if (App.isRefreshingTapiSession)
-                {
-                    App.tapi.stopSession();
-                    App.tapi.startSession();
-                    App.isRefreshingTapiSession = false;
-                }
-                /* this program may only one run once using this EXTENSION - avoid parallel processing of the same Extension */
-                if (App.mutex == null && App.Setup.Extension != "")
-                {
-                    App.mutex = new System.Threading.Mutex(true, "BBjTAPIClient.Net.Extension" + App.Setup.Extension, out App.createdNewMutex);
-                    if (!App.createdNewMutex)
-                        Close();
-                }
-                /* only once */
-                if (virgin)
-                {
-                    /* signalize fully connectivity */
-                    if (App.mainWin.Visibility==Visibility.Visible && App.Setup.IsExtensionRegistered && App.Setup.IsTapiSessionConnected)
+                    tickCounter++;
+                    if (App.Setup.IsNetworkConnectionEstablished == false)
                     {
-                        showBalloonTip("connected");
-                        virgin = false;
+                        App.network.disconnect();
+                        App.network.initialize(); // async embedded - continues before initialize call is completed - is okay here 
+                    }
+                    /* attempt to connect tapi line from time to time */
+                    if (App.Setup.IsTapiSessionConnected == false && tickCounter>0 && tickCounter % 5 == 0)
+                        App.isRefreshingTapiSession = true;
+                    /* refresh tapi line session */
+                    if (App.isRefreshingTapiSession)
+                    {
+                        App.tapi.stopSession();
+                        App.tapi.startSession();
+                        App.isRefreshingTapiSession = false;
+                    }
+                    /* this program may only one run once using this EXTENSION - avoid parallel processing of the same Extension */
+                    if (App.mutex == null && App.Setup.Extension != "")
+                    {
+                        App.mutex = new System.Threading.Mutex(true, "BBjTAPIClient.Net.Extension" + App.Setup.Extension, out App.createdNewMutex);
+                        if (!App.createdNewMutex)
+                            Close();
+                    }
+                    /* only once */
+                    if (virgin)
+                    {
+                        /* signalize fully connectivity */
+                        if (App.mainWin.Visibility == Visibility.Visible && App.Setup.IsExtensionRegistered && App.Setup.IsTapiSessionConnected)
+                        {
+                            showBalloonTip("connected");
+                            virgin = false;
+                        }
                     }
                 }
+                timerCurrentlyRaised = false;
             }
         }
         #endregion

@@ -87,11 +87,19 @@ namespace BBjTapiClient.utils
         {
             if (App.Setup.IsNetworkConnectionEstablished)
             {
-                string command = String.Format("REG:{0}", App.Setup.Extension);
-                streamWriter.WriteLine(command+"\r\n");
-                streamWriter.Flush();
-                App.log(String.Format("Sent registration command stream '{0}'", command));
-                App.Setup.IsExtensionRegistered = true;
+                try
+                {
+                    string command = String.Format("REG:{0}", App.Setup.Extension);
+                    streamWriter.WriteLine(command + "\r\n");
+                    streamWriter.Flush();
+                    App.log(String.Format("Sent registration command stream '{0}'", command));
+                    App.Setup.IsExtensionRegistered = true;
+                }
+                catch (Exception ex)
+                {
+                    App.log(String.Format("Unable to send the register extension command stream. {0}", ex.Message));
+                    App.Setup.IsNetworkConnectionEstablished = false; // try to reconnect soon then 
+                }
             }
         }
 
@@ -101,10 +109,18 @@ namespace BBjTapiClient.utils
         {
             if (App.Setup.IsNetworkConnectionEstablished)
             {
-                string command = String.Format("CALL:{0}", plainPhoneNumber);
-                streamWriter.WriteLine(command + "\r\n");
-                streamWriter.Flush();
-                App.log(String.Format("Sent incoming call command stream '{0}'", command));
+                try
+                {
+                    string command = String.Format("CALL:{0}", plainPhoneNumber);
+                    streamWriter.WriteLine(command + "\r\n");
+                    streamWriter.Flush();
+                    App.log(String.Format("Sent incoming call command stream '{0}'", command));
+                }
+                catch (Exception ex)
+                {
+                    App.log(String.Format("Unable to send the incoming call command stream. {0}", ex.Message));
+                    App.Setup.IsNetworkConnectionEstablished = false; // try to reconnect soon then 
+                }
             }
         }
 
@@ -114,10 +130,19 @@ namespace BBjTapiClient.utils
         {
             if (App.Setup.IsNetworkConnectionEstablished)
             {
-                string command = String.Format("TSPBINDING:{0}|{1}|{2}", App.Setup.Extension, App.Setup.Line, App.Setup.Address);
-                streamWriter.WriteLine(command + "\r\n");
-                streamWriter.Flush();
-                App.log(String.Format("Sent actual TSP binding command stream '{0}'", command));
+                try
+                {
+                    string command = String.Format("TSPBINDING:{0}|{1}|{2}", App.Setup.Extension, App.Setup.Line, App.Setup.Address);
+                    streamWriter.WriteLine(command + "\r\n");
+                    streamWriter.Flush();
+                    App.log(String.Format("Sent actual TSP binding command stream '{0}'", command));
+                }
+                catch (Exception ex)
+                {
+                    App.log(String.Format("Unable to send the actual TSP binding command stream. {0}", ex.Message));
+                    App.Setup.IsNetworkConnectionEstablished = false; // try to reconnect soon then 
+                }
+               
             }
         }
 
@@ -130,10 +155,18 @@ namespace BBjTapiClient.utils
         {
             if (App.Setup.IsNetworkConnectionEstablished)
             {
-                string command = String.Format("ALLBINDINGS:{0}", App.tapi.allLinesAndAddresses);
-                streamWriter.WriteLine(command + "\r\n");
-                streamWriter.Flush();
-                App.log(String.Format("Sent all available TSP bindings command stream"));
+                try
+                {
+                    string command = String.Format("ALLBINDINGS:{0}", App.tapi.allLinesAndAddresses);
+                    streamWriter.WriteLine(command + "\r\n");
+                    streamWriter.Flush();
+                    App.log(String.Format("Sent all available TSP bindings command stream"));
+                }
+                catch (Exception ex)
+                {
+                    App.log(String.Format("Unable to send all available TSP bindings command stream. {0}",ex.Message));
+                    App.Setup.IsNetworkConnectionEstablished = false; // try to reconnect soon then 
+                }
             }
         }
 

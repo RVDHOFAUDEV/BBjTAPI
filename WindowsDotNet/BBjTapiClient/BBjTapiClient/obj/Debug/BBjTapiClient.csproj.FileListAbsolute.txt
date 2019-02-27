@@ -26,7 +26,6 @@ D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Debug\BBjTapiClient
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Debug\BBjTapiClient.exe
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Debug\BBjTapiClient.pdb
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\bin\Debug\Atapi.xml
-D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient.csprojResolveAssemblyReference.cache
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\MainWindow.g.cs
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\pages\binding.g.cs
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\pages\extras.g.cs

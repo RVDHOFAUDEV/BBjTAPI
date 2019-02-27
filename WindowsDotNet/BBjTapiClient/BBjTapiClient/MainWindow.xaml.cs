@@ -41,26 +41,42 @@ namespace BBjTapiClient
 
         public MainWindow()
         {
-            InitializeComponent();
-            hideApplication();
-            App.mainWin = this;
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Application_ThreadException);
-            initializeAsTrayIconApplication();
-            setMainWindowTitle();
-            App.displayPage("binding"); // main settings
-            App.network.initialize(); // method code continues before call is completed - is okay here
-            
-            if (App.Setup.Extension == "" | App.Setup.Line == "")
+            bool startThrough = true;
+            /* this program may only run once using this EXTENSION - avoid parallel processing of the same Extension */
+            if (App.Setup.Extension != "")
             {
-                showApplication(); // only display the app on the desktop if the setup is incomplete
-                virgin = true;
+                App.mutex = new System.Threading.Mutex(true, "BBjTAPIClient.Net.Extension" + App.Setup.Extension, out App.createdNewMutex);
+                if (!App.createdNewMutex)
+                {
+                    startThrough = false;
+                    cancelShutDown = false;
+                    closeApplication();
+                }
             }
-
-            App.isPreparationPhase = false; //Preparation done - user interaction allowed
-            startTimer();
-            if (!App.startAppSilent)
+            if (startThrough)
             {
-                showBalloonTip("Telephony service provider client executed.");
+                /* isn't running yet using this Extension ' */
+                InitializeComponent();
+                hideApplication();
+                App.mainWin = this;
+                AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Application_ThreadException);
+                initializeAsTrayIconApplication();
+                setMainWindowTitle();
+                App.displayPage("binding"); // main settings
+                App.network.initialize(); // method code continues before call is completed - is okay here
+
+                if (App.Setup.Extension == "" | App.Setup.Line == "")
+                {
+                    showApplication(); // only display the app on the desktop if the setup is incomplete
+                    virgin = true;
+                }
+
+                App.isPreparationPhase = false; //Preparation done - user interaction allowed
+                startTimer();
+                if (!App.startAppSilent)
+                {
+                    showBalloonTip("Telephony service provider client executed.");
+                }
             }
         }
 
@@ -252,13 +268,27 @@ namespace BBjTapiClient
                 if (App.isPreparationPhase == false)
                 {
                     tickCounter++;
+                    /* this program may only run once using this EXTENSION - avoid parallel processing of the same Extension */
+                    if (App.mutex==null && App.Setup.Extension!= "")
+                    {
+                        App.mutex = new System.Threading.Mutex(true, "BBjTAPIClient.Net.Extension" + App.Setup.Extension, out App.createdNewMutex);
+                        /** the App.createdNewMutex should prevent from further parallel processing the same extension on the same server */
+                        if (App.createdNewMutex)
+                        {
+                            App.log("Okay, did pin extension '" + App.Setup.Extension + "' to avoid a concurrent session using the same extension!");
+                        }
+                        else
+                        {
+                            App.log("Unable to pin the extension '" + App.Setup.Extension + "'. It has already been pinned! Please close this BBjTapiClient!");
+                        }
+                    }
                     if (App.Setup.IsNetworkConnectionEstablished == false)
                     {
                         App.network.disconnect();
                         App.network.initialize(); // async embedded - continues before initialize call is completed - is okay here 
                     }
                     /* attempt to connect tapi line from time to time */
-                    if (App.Setup.IsTapiSessionConnected == false && tickCounter>0 && tickCounter % 5 == 0)
+                        if (App.Setup.IsTapiSessionConnected == false && tickCounter>0 && tickCounter % 5 == 0)
                         App.isRefreshingTapiSession = true;
                     /* refresh tapi line session */
                     if (App.isRefreshingTapiSession)
@@ -266,13 +296,6 @@ namespace BBjTapiClient
                         App.tapi.stopSession();
                         App.tapi.startSession();
                         App.isRefreshingTapiSession = false;
-                    }
-                    /* this program may only one run once using this EXTENSION - avoid parallel processing of the same Extension */
-                    if (App.mutex == null && App.Setup.Extension != "")
-                    {
-                        App.mutex = new System.Threading.Mutex(true, "BBjTAPIClient.Net.Extension" + App.Setup.Extension, out App.createdNewMutex);
-                        if (!App.createdNewMutex)
-                            Close();
                     }
                     /* only once */
                     if (virgin)

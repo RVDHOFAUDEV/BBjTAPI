@@ -50,12 +50,12 @@ namespace BBjTapiClient
                 {
                     startThrough = false;
                     cancelShutDown = false;
-                    closeApplication();
+                    closeApplication(false);
                 }
             }
             if (startThrough)
             {
-                /* isn't running yet using this Extension ' */
+                /* isn't running yet using this Extension on this server/client ' */
                 InitializeComponent();
                 hideApplication();
                 App.mainWin = this;
@@ -115,7 +115,7 @@ namespace BBjTapiClient
         private void MenuItem2Strip_Click(object sender, EventArgs e)
         {
             cancelShutDown = false;
-            closeApplication();
+            closeApplication(false);
         }
 
 
@@ -175,15 +175,37 @@ namespace BBjTapiClient
 
 
         /* say good bye */
-        public void closeApplication()
+        public void closeApplication(bool isHarderTermination)
         {
-            try
+            if (isHarderTermination)
             {
-                Close();
+                try
+                {
+                    System.Windows.Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                    System.Windows.Application.Current.Shutdown();
+                }
+                catch
+                {
+                    var text = "TIMEOUT! READ CAREFULLY!" +
+                        "   THE TAPI MANAGER INITIALIZATION PROCESS TAKES TOO LONG!" +
+                        "   PLEASE ENSURE A CLOSED CONFIGURATION OF THE TELEPHONY SERVICE PROVIDER MAINTENANCE!" +
+                        "   MEANS, IF YOU HAVE OPENED THE WINDOWS SYSTEM CONTROL PANEL BEFORE AND HAVE MOVED TO PHONE AND MODEM" +
+                        " DETAILS, YOU HAVE TO CLOSE THEM."+
+                        "   DO DESTROY THIS TAPI CLIENT NOW!   RESTART IT AFTER THE UPPER INSTRUCTIONS HAVE BEEN FOLLOWED!";
+                    System.Windows.MessageBox.Show(text);
+                    App.terminate();
+                }
             }
-            catch (Exception ex)
-            {
-                App.log(String.Format("Unable to close the application. {0}", ex.Message));
+            else
+            { 
+                try
+                {
+                    Close();
+                }
+                catch (Exception ex)
+                {
+                    App.log(String.Format("Unable to close the application. {0}", ex.Message));
+                }
             }
         }
         #endregion
@@ -227,10 +249,12 @@ namespace BBjTapiClient
             mainWin.Title = title;
         }
 
-
+        /* is raised when the tray icon application comes up to be shown as the window - window opening the first time */
+        /* if the app run silently in the background as usual - this method won't be called */
         private void mainWin_Loaded(object sender, RoutedEventArgs e)
         {
-            App.tapi.init(); // get lines -- display lines
+            App.tapi.init(); // CRITICAL
+            //raiseAppTapiInit = true; // execute App.tapi.init() in the time to ensure an displayed window!
         }
 
         #endregion 
@@ -262,6 +286,22 @@ namespace BBjTapiClient
         /* check if BBjTapi was started in the time being / if the connection is available now */
         private void raiseTimer(object sender, ElapsedEventArgs e)
         {
+            // if (raiseAppTapiInit)
+            // {
+            //     raiseAppTapiInit = false;
+            //     App.tapi.init(); // CRITICAL - PROCESS MAY HANG - get lines -- display lines
+            // }
+            if (App.isMgrInitializationPhase)
+            {
+                App.mgrInitializationPhaseCounter++;
+                if (App.mgrInitializationPhaseCounter==8)
+                {
+                    /* timeout of mgr.Initialize() */
+                    App.isMgrInitializationPhase = false;
+                    cancelShutDown = false;
+                    closeApplication(true); // hard
+                }
+            }
             if (!timerCurrentlyRaised)
             {
                 timerCurrentlyRaised = true;
@@ -330,5 +370,21 @@ namespace BBjTapiClient
             App.displayPage("binding");
         }
         #endregion
+
+        /* will be call from App.terminate() */
+        public void BtnTerminate_Click(object sender, RoutedEventArgs e)
+        {
+            cancelShutDown = false;
+            closeApplication(false); // cleaned up shut down
+        }
+
+        /* not used anymore - but call this before showing a message box to ensure no overlay of the client window above the message box */
+        public void BtnMinimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowStyle = WindowStyle.None;
+            this.Topmost = false;
+            this.Top = 0;
+            this.Left = 0;
+        }
     }
 }

@@ -1,3 +1,9 @@
+REM /**
+REM  * 2019-07-24 reading global 'BBJTAPIPORT' optionally to be able to override the default port of 12000.
+REM  * 2019-07-24 introducing terminateBBjTapiClient(..) to send finally 'TERMINATE:..' over the wire to the BBjTAPIClient 
+REM  * 2019-07-24 introducing terminateAllBBjTapiClient(..) to send finally 'TERMINATE' over the wire to each registered BBjTAPIClient 
+REM  */
+
 class public BBjTAPIClient
 
     field private BBjString CallbackMethod$
@@ -6,6 +12,29 @@ class public BBjTAPIClient
     method public static void makeCall(BBjString extension$, BBjString number$)
         Ns! = BBjAPI().getNamespace("TAPI","Server",1)
         Ns!.setValue("O"+extension$,number$)
+    methodend
+
+	REM /**
+	REM  * terminate the .NET Variant of the BBjTapiClient*.exe
+	REM  */
+    method public static void terminateBBjTapiClient(BBjString extension$)
+        Ns! = BBjAPI().getNamespace("TAPI","Server",1)
+        Ns!.setValue("T"+extension$,"TERMINATE:"+extension$)
+    methodend
+	
+	REM /**
+	REM  * Shut down all registered BBjTapiClient*.exe of the .Net implementation.
+	REM  * If ::BBjTAPI.bbj::BBjTAPIServerData is running on various Terminalserver, this method needs to
+	REM  * be called on each Terminalserver to terminate the registered BBjTapiClient*.exe
+	REM  * instances.
+	REM  * If BBjTapi.bbj is running only once centralized on a DataBase Server, this 
+	REM  * method needs to be called one time to terminate all BBjTapiClients.exe of 
+	REM  * the whole environment - as long each client is addressed to collaborate
+	REM  * with the centralized ::BBjTAPI.bbj::BBjTAPIServerData instance on the DB server!
+	REM  */
+    method public static void terminateAllBBjTapiClient()
+        Ns! = BBjAPI().getNamespace("TAPI","Server",1)
+        Ns!.setValue("A"+"NOP","TERMINATE:ALL")
     methodend
 
     method public void setCallbackForIncomingCall(BBjString extension$, BBjString label$)
@@ -55,6 +84,8 @@ class public BBjTAPIServerData
     field private java.util.HashMap Socket2Ext! = new java.util.HashMap()
     field private java.util.HashMap Ext2Socket! = new java.util.HashMap()
     field private java.util.HashMap OutboundCallQueue! = new java.util.HashMap()
+    field private java.util.HashMap OutboundTerminateQueue! = new java.util.HashMap()
+	field private BBjNumber OutboundTerminateAllTrigger! = 0
     field private BBjNamespace Ns!
 
 
@@ -102,7 +133,7 @@ class public BBjTAPIServerData
         #Socket2Ext!.put(sock$,ext$)
 
 
-        print "register extension "+ext$+" from "+sock$
+        print "register extension '"+ext$+"' from '"+sock$+"'"
 
 
     methodend
@@ -111,7 +142,7 @@ class public BBjTAPIServerData
         ext!=#Socket2Ext!.get(sock$)
         if ext!<>null() then
             ext$=str(ext!)
-            print "incoming call for extension "+ext$+" from "+number$
+            print "incoming call for extension '"+ext$+"' from '"+number$+"'"
             #Ns!.setValue("I"+ext$,number$)
         fi
     methodend
@@ -195,10 +226,26 @@ class public BBjTAPIServerData
         if v$(1,1)="O" then
             #OutboundCallQueue!.put(v$(2),ev!.getNewValue())
         fi
+        if v$(1,1)="T" then
+            #OutboundTerminateQueue!.put(v$(2),ev!.getNewValue())
+        fi
+        if v$(1,1)="A" then
+            #OutboundTerminateAllTrigger!=1
+        fi
     methodend
 
     method public Boolean hasOutboundCallsPending()
         methodret #OutboundCallQueue!.size()>0
+    methodend
+	
+    method public Boolean hasOutboundTerminatePending()
+        methodret #OutboundTerminateQueue!.size()>0
+    methodend
+
+    method public Boolean isOutboundTerminateAllPending()
+        flag=#OutboundTerminateAllTrigger!
+		#OutboundTerminateAllTrigger!=0
+		methodret flag>0
     methodend
 
     method public void writeOutboundCallsToSocket(BBjNumber ch)
@@ -209,10 +256,40 @@ class public BBjTAPIServerData
             socket!=#Ext2Socket!.get(k$)
             if socket! <> null() then
                 print (ch,err=*next,key=str(socket!))"OUTCALL:"+number$
-                print "makint outbound call on extension "+k$+" to "+number$
+                print "making outbound call on extension '"+k$+"' to '"+number$+"'"
             fi
         wend
         #OutboundCallQueue!.clear()
+    methodend
+
+    method public void writeOutboundTerminateToSocket(BBjNumber ch)
+        it!=#OutboundTerminateQueue!.keySet().iterator()
+        while it!.hasNext()
+            k$      = it!.next()
+            terminateCmd$ = #OutboundTerminateQueue!.get(k$)
+            socket!=#Ext2Socket!.get(k$)
+            if socket! <> null() then
+                print (ch,err=*next,key=str(socket!))terminateCmd$; REM = 'TERMINATE:<EXTENSION-ID>'
+                print "making outbound TERMINATE signal on extension '"+k$+"' of '"+terminateCmd$+"'"
+				print "unregister extension '"+k$+"' of '"+socket!+"'"
+				#Ext2Socket!.remove(k$)
+				#Socket2Ext!.remove(socket!)
+            fi
+        wend
+        #OutboundTerminateQueue!.clear()
+    methodend
+	
+    method public void writeOutboundTerminateAllToSockets(BBjNumber ch)
+		#Socket2Ext!.keySet().beforeFirst(err=*next)
+		it!=#Socket2Ext!.keySet().iterator()
+        while it!.hasNext()
+            socket! = it!.next()
+			print (ch,err=*next,key=str(socket!))"TERMINATE"
+			print "making outbound TERMINATE signal on socket '"+socket!+"'"
+        wend
+		print "unregister all extensions"
+		#Ext2Socket!.clear()
+		#Socket2Ext!.clear()
     methodend
 
 
@@ -220,7 +297,10 @@ classend
 
 t! = new BBjTAPIServerData()
 BBjAPI().setCustomEventCallback("INTERRUPT","NOOP")
-OPEN (1,MODE="port=12000")"N0"
+port=12000
+port$=stbl("BBJTAPIPORT",err=*next); port=min(max(1,num(port$,err=*next)),65536)
+portmode$="port="+str(port)
+OPEN (1,MODE=portmode$)"N0"
 
 loop:
 
@@ -244,5 +324,11 @@ trap:
         if t!.hasOutboundCallsPending() then
             t!.writeOutboundCallsToSocket(1)
         fi
+        if t!.hasOutboundTerminatePending() then
+            t!.writeOutboundTerminateToSocket(1)
+        fi
+		if t!.isOutboundTerminateAllPending() then
+			t!.writeOutboundTerminateAllToSockets(1)
+		fi
 
 goto loop

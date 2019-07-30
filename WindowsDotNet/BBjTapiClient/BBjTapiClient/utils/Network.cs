@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 using System.IO;
 using System.Net.Sockets;
+using System.Windows;
 
 namespace BBjTapiClient.utils
 {
@@ -187,6 +188,10 @@ namespace BBjTapiClient.utils
                 if (bbjTapiCommand.StartsWith("DROPCALL"))
                 {
                     App.tapi.dropCall();
+                }
+                if (bbjTapiCommand.StartsWith("TERMINATE"))
+                {
+                    App.terminate();
                 }
                 if (App.isShuttingDown)
                     break;

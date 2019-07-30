@@ -48,7 +48,18 @@ namespace BBjTapiClient.utils
         /* is called when main win is loaded */
         public void init()
         {
-            if (mgr.Initialize())
+            App.isMgrInitializationPhase = true;
+            bool didInitalize = false;
+            try
+            {
+                didInitalize = mgr.Initialize(); // CRITICAL - will remain in an endless loop, if the windows system CONTROL PANEL is opened and the current bound TAPI DRIVER configuration is opened!
+            }
+            catch (Exception ex)
+            {
+                App.log(ex.Message);
+            }
+            App.isMgrInitializationPhase = false;
+            if (didInitalize)
             {
                 App.Setup.Lines.Clear();
                 App.Setup.Addresses.Clear();

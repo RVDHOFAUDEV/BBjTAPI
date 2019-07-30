@@ -41,6 +41,7 @@ namespace BBjTapiClient.pages
                 App.tapi.setCurrentLine((string)cb.SelectedItem);
                 App.isRefreshingTapiSession = true; // impulse for re-connecting
                 Addresses.Text = App.tapi.currentAddress.Address; // refresh the address - mostly the only one available within the TAPI LINE
+                App.Setup.Line = (string)cb.SelectedItem;
             }
             isSuppressLineRefresh = false;
         }
@@ -52,6 +53,7 @@ namespace BBjTapiClient.pages
                 ComboBox cb = (ComboBox)sender;
                 App.tapi.setCurrentAddress((string)cb.SelectedItem);
                 App.isRefreshingTapiSession = true;// impulse for re-connecting
+                App.Setup.Address = (string)cb.SelectedItem;
             }
             isSuppressAddressRefresh = false;
         }

@@ -62,6 +62,14 @@ namespace BBjTapiClient
         public static List<string> backlog = new List<string>();
         public static bool isWorkoutBacklog = false;
 
+        /*  control the TAPI Manager execution - The manager might run in an endless loop - the following VAR in the timer is the watchdog */
+        public static bool isMgrInitializationPhase = false;
+        public static int mgrInitializationPhaseCounter = 0;
+
+        /* termination flag retrieved from BBjTapi.bbj for instance */
+        /* This might be true if the admin shuts down remotly all active BBjTapiCientNet.exe Clients */
+        //public static bool terminationFlag = false;
+
         /* open a page */
         public static void displayPage(string pageName)
         {
@@ -82,6 +90,32 @@ namespace BBjTapiClient
             }
             App.lastDisplayedPageName = pageName;
         }
+
+
+        /* testwise */
+        public static void minimize()
+        {
+            mainWin.btnTerminate.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Send, (Action)
+                delegate ()
+                {
+                    mainWin.BtnMinimize_Click(null, null);
+                        }
+            );
+        }
+
+
+
+        public static void terminate()
+        {
+            mainWin.btnTerminate.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Send, (Action)
+                delegate ()
+                {
+                    mainWin.BtnTerminate_Click(null, null); // SHUT DOWN APPLICATION
+                        }
+            );
+        }
+
+
 
         /* log information */
         public static void log(String message)
@@ -203,6 +237,7 @@ namespace BBjTapiClient
             if (e.Exception != null)
                 App.log("Exception! " + e.Exception.Message);
         }
+
 
     }
 }

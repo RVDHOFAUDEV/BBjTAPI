@@ -52,11 +52,13 @@ namespace BBjTapiClient.pages
         private void btnPostActual_Click(object sender, RoutedEventArgs e)
         {
             App.network.actualLineAndAddress(); // send actual binding
+            System.Windows.MessageBox.Show("DONE");
         }
 
         private void btnPostAll_Click(object sender, RoutedEventArgs e)
         {
             App.network.allLinesAndAddresses(); //send collection of all line address pairs
+            System.Windows.MessageBox.Show("DONE");
         }
     }
 }

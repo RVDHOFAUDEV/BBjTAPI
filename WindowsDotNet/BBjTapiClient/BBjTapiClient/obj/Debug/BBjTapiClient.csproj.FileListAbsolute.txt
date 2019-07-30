@@ -41,3 +41,5 @@ D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient.csproj.GenerateResource.Cache
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient.exe
 D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient.pdb
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient.csproj.CoreCompileInputs.cache
+D:\GIT\BBjTAPI\WindowsDotNet\BBjTapiClient\BBjTapiClient\obj\Debug\BBjTapiClient.csproj.CopyComplete

@@ -30,6 +30,8 @@
             <!--<Label Foreground="#FFC8C7C7" Content="{Binding Source={x:Static project:App.Setup}, Path=Version, Mode=OneWay}"></Label>-->
             <Button Name="btnBinding" Content="Bindings" Click="Button_Click_4" Style="{StaticResource activeButton}"></Button>
             <Button Name="btnExtras" Content="Extras" Click="Button_Click_3"></Button>
+            <Button Name="btnTerminate" Content="Terminate" Click="BtnTerminate_Click" Visibility="Hidden"></Button>
+            <Button Name="btnMinimize" Content="Minimize" Click="BtnMinimize_Click" Visibility="Hidden"></Button>
         </StackPanel>
         <!-- logging -->
         <Expander DockPanel.Dock="Bottom" Header="Logging">
